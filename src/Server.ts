@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import http from "http"
 import dotenv from "dotenv"
 import { Routes } from "../routes/student.route";
+import { mongooseErrorHandler } from "./middlewares/mongoose.error";
 dotenv.config()
 
 const router = new Routes()
@@ -46,6 +47,8 @@ class Server {
         //         data: [],
         //     });
         // });
+        
+        this.app.use(mongooseErrorHandler)
 
         this.app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
             console.error("Unhandled Error:", error);

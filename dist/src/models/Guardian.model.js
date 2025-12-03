@@ -20,7 +20,6 @@ const GuardianSchema = new mongoose_1.Schema({
     fatherNID: {
         type: String,
         required: [true, "Father's NID is required"],
-        unique: true,
         validate: {
             validator: (v) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
             message: 'Father NID must be 10, 13, or 17 digits',
@@ -50,7 +49,6 @@ const GuardianSchema = new mongoose_1.Schema({
     motherNID: {
         type: String,
         required: [true, "Mother's NID is required"],
-        unique: true,
         validate: {
             validator: (v) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
             message: 'Mother NID must be 10, 13, or 17 digits',

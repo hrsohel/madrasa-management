@@ -23,7 +23,18 @@ class BaseRepository extends BaseRepositoryAbstraction {
         return await this.model.find().lean().exec();
     }
     async filterDocs(filter) {
-        return await this.model.find(filter).lean().exec();
+        let { page = 1, limit = 10 } = filter;
+        if (!page)
+            page = 1;
+        if (!limit)
+            limit = 10;
+        const skip = Math.abs((Number(page) - 1) * Number(limit));
+        delete filter.page;
+        delete filter.limit;
+        return await this.model.find(filter).skip(skip).limit(limit).lean().exec();
+    }
+    async totalDocuments(filter) {
+        return await this.model.countDocuments(filter);
     }
 }
 exports.BaseRepository = BaseRepository;

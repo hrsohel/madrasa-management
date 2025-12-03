@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const student_route_1 = require("../routes/student.route");
+const mongoose_error_1 = require("./middlewares/mongoose.error");
 dotenv_1.default.config();
 const router = new student_route_1.Routes();
 class Server {
@@ -41,6 +42,7 @@ class Server {
         //         data: [],
         //     });
         // });
+        this.app.use(mongoose_error_1.mongooseErrorHandler);
         this.app.use((error, req, res, next) => {
             console.error("Unhandled Error:", error);
             res.status(500).json({

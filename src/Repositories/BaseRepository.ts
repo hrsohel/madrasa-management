@@ -9,7 +9,7 @@ abstract class BaseRepositoryAbstraction<T extends Document> {
 }
 
 abstract class BaseRepository<T extends Document> extends BaseRepositoryAbstraction<T> {
-  constructor(protected readonly model: Model<T>) {super()}
+  constructor(protected readonly model: Model<T>) { super() }
 
   async createDocs(bodyData: Partial<T>): Promise<T> {
     const doc = new this.model(bodyData);
@@ -29,7 +29,17 @@ abstract class BaseRepository<T extends Document> extends BaseRepositoryAbstract
   }
 
   async filterDocs(filter: any): Promise<T[]> {
-    return await this.model.find(filter).lean().exec();
+    let { page = 1, limit = 10 } = filter
+    if(!page) page = 1
+    if(!limit) limit = 10
+    const skip = Math.abs((Number(page) - 1) * Number(limit))
+    delete filter.page
+    delete filter.limit
+    return await this.model.find(filter).skip(skip).limit(limit).lean().exec();
+  }
+
+  async totalDocuments(filter: any): Promise<number> {
+    return await this.model.countDocuments(filter)
   }
 }
 
