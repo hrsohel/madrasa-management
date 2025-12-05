@@ -9,6 +9,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const student_route_1 = require("../routes/student.route");
 const mongoose_error_1 = require("./middlewares/mongoose.error");
 dotenv_1.default.config();
+const cors_1 = __importDefault(require("cors"));
 const router = new student_route_1.Routes();
 class Server {
     constructor() {
@@ -19,6 +20,9 @@ class Server {
         this.configureErrorHandling();
     }
     configureMiddleware() {
+        this.app.use((0, cors_1.default)({
+            origin: "*"
+        }));
         this.app.use(express_1.default.json({ limit: "10mb" }));
         this.app.use(express_1.default.urlencoded({ extended: true }));
     }

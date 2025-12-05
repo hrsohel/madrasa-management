@@ -5,6 +5,7 @@ import dotenv from "dotenv"
 import { Routes } from "../routes/student.route";
 import { mongooseErrorHandler } from "./middlewares/mongoose.error";
 dotenv.config()
+import cors from "cors"
 
 const router = new Routes()
 
@@ -22,6 +23,9 @@ class Server {
     }
 
     private configureMiddleware(): void {
+        this.app.use(cors({
+            origin: "*"
+        }))
         this.app.use(express.json({ limit: "10mb" }))
         this.app.use(express.urlencoded({ extended: true }))
     }

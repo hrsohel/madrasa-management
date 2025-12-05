@@ -43,22 +43,22 @@ const GuardianSchema = new Schema<IGuardian>(
         fatherNID: {
             type: String,
             required: [true, "Father's NID is required"],
-            validate: {
-                validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
-                message: 'Father NID must be 10, 13, or 17 digits',
-            },
+            // validate: {
+            //     validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
+            //     message: 'Father NID must be 10, 13, or 17 digits',
+            // },
         },
         fatherPhone: {
             type: String,
-            validate: {
-                validator: function (this: IGuardian, v: string) {
-                    // Optional if guardian is father
-                    if (this.guardianRelation === 'Father' && !v) return false;
-                    if (!v) return true; // optional otherwise
-                    return /^01[3-9]\d{8}$/.test(v);
-                },
-                message: 'Invalid or missing father phone number',
-            },
+            // validate: {
+            //     validator: function (this: IGuardian, v: string) {
+            //         // Optional if guardian is father
+            //         if (this.guardianRelation === 'Father' && !v) return false;
+            //         if (!v) return true; // optional otherwise
+            //         return /^01[3-9]\d{8}$/.test(v);
+            //     },
+            //     message: 'Invalid or missing father phone number',
+            // },
         },
 
         // Mother
@@ -71,21 +71,21 @@ const GuardianSchema = new Schema<IGuardian>(
         motherNID: {
             type: String,
             required: [true, "Mother's NID is required"],
-            validate: {
-                validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
-                message: 'Mother NID must be 10, 13, or 17 digits',
-            },
+            // validate: {
+            //     validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
+            //     message: 'Mother NID must be 10, 13, or 17 digits',
+            // },
         },
         motherPhone: {
             type: String,
-            validate: {
-                validator: function (this: IGuardian, v: string) {
-                    if (this.guardianRelation === 'Mother' && !v) return false;
-                    if (!v) return true;
-                    return /^01[3-9]\d{8}$/.test(v);
-                },
-                message: 'Invalid or missing mother phone number',
-            },
+            // validate: {
+            //     validator: function (this: IGuardian, v: string) {
+            //         if (this.guardianRelation === 'Mother' && !v) return false;
+            //         if (!v) return true;
+            //         return /^01[3-9]\d{8}$/.test(v);
+            //     },
+            //     message: 'Invalid or missing mother phone number',
+            // },
         },
 
         // Main Guardian (the one we contact)
@@ -97,26 +97,26 @@ const GuardianSchema = new Schema<IGuardian>(
         guardianNID: {
             type: String,
             required: [true, 'Guardian NID is required'],
-            validate: {
-                validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
-                message: 'Guardian NID must be 10, 13, or 17 digits',
-            },
+            // validate: {
+            //     validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
+            //     message: 'Guardian NID must be 10, 13, or 17 digits',
+            // },
         },
         guardianPhone: {
             type: String,
             required: [true, 'Guardian phone is required'],
-            validate: {
-                validator: (v: string) => /^01[3-9]\d{8}$/.test(v),
-                message: 'Invalid Bangladeshi mobile number (e.g., 017xxxxxxxx)',
-            },
+            // validate: {
+            //     validator: (v: string) => /^01[3-9]\d{8}$/.test(v),
+            //     message: 'Invalid Bangladeshi mobile number (e.g., 017xxxxxxxx)',
+            // },
         },
         guardianRelation: {
             type: String,
             required: [true, 'Guardian relation is required'],
-            enum: {
-                values: ['Father', 'Mother', 'Uncle', 'Aunt', 'Grandfather', 'Grandmother', 'Other'],
-                message: 'Invalid guardian relation',
-            },
+            // enum: {
+            //     values: ['Father', 'Mother', 'Uncle', 'Aunt', 'Grandfather', 'Grandmother', 'Other'],
+            //     message: 'Invalid guardian relation',
+            // },
         },
     },
     {

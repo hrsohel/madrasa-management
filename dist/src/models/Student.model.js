@@ -24,16 +24,16 @@ const StudentSchema = new mongoose_1.Schema({
     },
     nid: {
         type: String,
-        unique: true,
-        validate: {
-            validator: (v) => /^\d{10,17}$/.test(v),
-            message: 'Invalid NID/Birth Certificate number (10–17 digits)',
-        },
+        // unique: true,
+        // validate: {
+        //   validator: (v: string) => /^\d{10,17}$/.test(v),
+        //   message: 'Invalid NID/Birth Certificate number (10–17 digits)',
+        // },
     },
     birthCertificate: {
         type: String,
-        unique: true,
-        match: [/^\d{17}$/, 'Birth certificate must be exactly 17 digits'],
+        // unique: true,
+        // match: [/^\d{17}$/, 'Birth certificate must be exactly 17 digits'],
     },
     gender: {
         type: String,
@@ -54,31 +54,31 @@ const StudentSchema = new mongoose_1.Schema({
     phone: {
         type: String,
         required: [true, 'Guardian phone is required'],
-        validate: {
-            validator: (v) => /^(\+8801|01)[3-9]\d{8}$/.test(v),
-            message: 'Invalid Bangladeshi mobile number (e.g., 017XXXXXXXX)',
-        },
+        // validate: {
+        //   validator: (v: string) => /^(\+8801|01)[3-9]\d{8}$/.test(v),
+        //   message: 'Invalid Bangladeshi mobile number (e.g., 017XXXXXXXX)',
+        // },
     },
     uid: {
         type: String,
         required: [true, "ID is required"],
         unique: true,
         uppercase: true,
-        match: [/^STD-\d{4}-\d{5}$/, 'UID must follow format: STD-2025-00001'],
+        // match: [/^STD-\d{4}-\d{5}$/, 'UID must follow format: STD-2025-00001'],
     },
     residential: {
         type: String,
         required: [true, 'Residential status is required'],
-        enum: {
-            values: ['Day Scholar', 'Hostel', 'Residential'],
-            message: 'Residential must be Day Scholar, Hostel or Residential',
-        },
+        // enum: {
+        //   values: ['Day Scholar', 'Hostel', 'Residential'],
+        //   message: 'Residential must be Day Scholar, Hostel or Residential',
+        // },
     },
     roll: {
         type: String,
         required: true,
-        unique: true,
-        match: [/^\d{4,6}$/, 'Roll must be numeric (e.g., 001 or 2025001)'],
+        // unique: true,
+        // match: [/^\d{4,6}$/, 'Roll must be numeric (e.g., 001 or 2025001)'],
     },
     class: {
         type: String,
@@ -87,10 +87,10 @@ const StudentSchema = new mongoose_1.Schema({
     shift: {
         type: String,
         required: [true, 'Shift is required'],
-        enum: {
-            values: SHIFT,
-            message: 'Shift must be Morning, Day or Evening',
-        },
+        // enum: {
+        //   values: SHIFT,
+        //   message: 'Shift must be Morning, Day or Evening',
+        // },
     },
     section: {
         type: String,
@@ -103,7 +103,7 @@ const StudentSchema = new mongoose_1.Schema({
     session: {
         type: String,
         required: [true, 'Session is required'],
-        match: [/^\d{2}-\d{2}$/, 'Session format must be YYYY-YY (e.g., 25-26)'],
+        // match: [/^\d{2}-\d{2}$/, 'Session format must be YYYY-YY (e.g., 25-26)'],
     },
 }, {
     timestamps: true,
