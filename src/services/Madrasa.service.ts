@@ -1,10 +1,10 @@
-import { OldMadrasaRepository } from "../Repositories/OldMadrasa.respository";
+import { OldMadrasaRepository } from '../Repositories/OldMadrasa.respository';
+import { IOldMadrasaInfo } from '../models/OldMadrasaInfo.model';
 
-const madrasaRepo = new OldMadrasaRepository
+const oldMadrasaRepository = new OldMadrasaRepository()
 
 export class MadrasaService {
-    async addMadrasaInfo(bodyData: any) {
-        return await madrasaRepo.createDocs(bodyData)
+    async addMadrasaInfo(bodyData: Partial<IOldMadrasaInfo>) {
+        return await oldMadrasaRepository.createDocs(bodyData)
     }
-    
 }

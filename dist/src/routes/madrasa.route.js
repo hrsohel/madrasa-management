@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.madrasaRoutes = void 0;
+const express_1 = require("express");
+const madrasa_controller_1 = require("../controllers/madrasa.controller");
+const upload_1 = require("../middlewares/upload");
+const router = (0, express_1.Router)();
+router.get('/', madrasa_controller_1.madrasaController.get);
+router.post('/', upload_1.upload.single('logo'), madrasa_controller_1.madrasaController.create);
+router.patch('/', upload_1.upload.single('logo'), madrasa_controller_1.madrasaController.update);
+exports.madrasaRoutes = router;

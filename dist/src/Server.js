@@ -25,6 +25,7 @@ class Server {
         }));
         this.app.use(express_1.default.json({ limit: "10mb" }));
         this.app.use(express_1.default.urlencoded({ extended: true }));
+        this.app.use('/uploads', express_1.default.static('uploads'));
     }
     configureRoutes() {
         this.app.get("/health", (req, res) => {

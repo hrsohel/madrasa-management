@@ -28,6 +28,7 @@ class Server {
         }))
         this.app.use(express.json({ limit: "10mb" }))
         this.app.use(express.urlencoded({ extended: true }))
+        this.app.use('/uploads', express.static('uploads'))
     }
 
     private configureRoutes(): void {
