@@ -54,12 +54,26 @@ class StudentController {
     }
     async updateStudent(req, res, next) {
         try {
-            await studentService.updateStudent({ ...req.body, _id: req.params.id });
+            const updatedUser = await studentService.updateStudent({ ...req.body, _id: req.params.id });
             return res.status(201).json({
                 status: 201,
                 success: true,
                 messages: "student data updated",
-                data: []
+                data: updatedUser
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async filterAllStudents(req, res, next) {
+        try {
+            const results = await studentService.filterStudent(req.query);
+            return res.status(200).json({
+                status: 200,
+                message: "all student data",
+                success: true,
+                data: results
             });
         }
         catch (error) {

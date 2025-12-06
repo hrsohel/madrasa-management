@@ -50,12 +50,26 @@ export class StudentController {
 
     async updateStudent(req: Request, res: Response, next: NextFunction) {
         try {
-            await studentService.updateStudent({...req.body, _id: req.params.id})
+            const updatedUser = await studentService.updateStudent({...req.body, _id: req.params.id})
             return res.status(201).json({
                 status: 201,
                 success: true,
                 messages: "student data updated",
-                data: []
+                data: updatedUser
+            })
+        } catch (error: unknown) {
+            next(error as Error)
+        }
+    }
+
+    async filterAllStudents(req: Request, res: Response, next: NextFunction) {
+        try {
+            const results = await studentService.filterStudent(req.query)
+            return res.status(200).json({
+                status: 200,
+                message: "all student data",
+                success: true,
+                data: results
             })
         } catch (error: unknown) {
             next(error as Error)

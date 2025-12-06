@@ -53,6 +53,6 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
     }
 
     async updateStudent(bodyData: any) {
-        return await Student.updateOne({_id: bodyData._id}, {$set: bodyData})
+        return await Student.findOneAndUpdate({_id: bodyData._id}, {$set: bodyData}, {new: true})
     }
 }

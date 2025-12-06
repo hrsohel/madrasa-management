@@ -57,7 +57,7 @@ class StudentRepostitory extends BaseRepository_1.BaseRepository {
         ]);
     }
     async updateStudent(bodyData) {
-        return await Student_model_1.default.updateOne({ _id: bodyData._id }, { $set: bodyData });
+        return await Student_model_1.default.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true });
     }
 }
 exports.StudentRepostitory = StudentRepostitory;
