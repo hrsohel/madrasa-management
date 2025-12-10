@@ -34,7 +34,7 @@ class Server {
     private configureRoutes(): void {
         this.app.get("/health", (req: Request, res: Response) => {
             res.status(200).json({
-                status: "OK. After the CI/CD",
+                status: "OK. Yahoo! It's running.",
                 uptime: process.uptime(),
                 timestamps: new Date().toISOString()
             })

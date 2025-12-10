@@ -30,7 +30,7 @@ class Server {
     configureRoutes() {
         this.app.get("/health", (req, res) => {
             res.status(200).json({
-                status: "OK. After the CI/CD",
+                status: "OK. Yahoo! It's running.",
                 uptime: process.uptime(),
                 timestamps: new Date().toISOString()
             });
