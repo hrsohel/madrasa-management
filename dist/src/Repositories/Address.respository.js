@@ -10,5 +10,8 @@ class AddressRepository extends BaseRepository_1.BaseRepository {
     constructor() {
         super(Address_model_1.default);
     }
+    async updateAddress(bodyData) {
+        return await Address_model_1.default.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true });
+    }
 }
 exports.AddressRepository = AddressRepository;

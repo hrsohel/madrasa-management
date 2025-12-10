@@ -9,9 +9,10 @@ class BaseRepository extends BaseRepositoryAbstraction {
         super();
         this.model = model;
     }
-    async createDocs(bodyData) {
+    async createDocs(bodyData, session) {
+        console.log(bodyData);
         const doc = new this.model(bodyData);
-        return await doc.save();
+        return await doc.save(session ? { session } : undefined);
     }
     async findById(_id) {
         return await this.model.findById(_id).lean().exec();

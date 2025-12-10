@@ -4,8 +4,8 @@ exports.StudentService = void 0;
 const Student_repository_1 = require("../Repositories/Student.repository");
 const studentRepo = new Student_repository_1.StudentRepostitory();
 class StudentService {
-    async addStudent(bodyData) {
-        return await studentRepo.createDocs(bodyData);
+    async addStudent(bodyData, session) {
+        return await studentRepo.createDocs(bodyData, session);
     }
     async findStudentId(id) {
         return await studentRepo.findById(id);

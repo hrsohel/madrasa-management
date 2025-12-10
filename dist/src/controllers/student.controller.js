@@ -19,13 +19,14 @@ class StudentController {
     async addStudent(req, res, next) {
         const session = await mongoose_1.default.startSession();
         try {
+            req.body.profileImage = req.file ? `/uploads/${req.file.filename}` : null;
             session.startTransaction();
-            const student = await studentService.addStudent(req.body.student);
-            await guardianService.addGuardian({ ...req.body.guardian, student: student._id });
-            await addressService.addAddress({ ...req.body.address, student: student._id });
-            await madrasaService.addMadrasaInfo({ ...req.body.madrasa, student: student._id });
-            await feesService.addFees({ ...req.body.fees, student: student._id });
-            session.commitTransaction();
+            const student = await studentService.addStudent({ ...req.body.student, profileImage: req.body.profileImage }, session);
+            await guardianService.addGuardian({ ...req.body.guardian, student: student._id }, session);
+            await addressService.addAddress({ ...req.body.address, student: student._id }, session);
+            await madrasaService.addMadrasaInfo({ ...req.body.madrasa, student: student._id }, session);
+            await feesService.addFees({ ...req.body.fees, student: student._id }, session);
+            await session.commitTransaction();
             return res.status(201).json({
                 status: 201,
                 success: true,
@@ -34,8 +35,11 @@ class StudentController {
             });
         }
         catch (error) {
-            session.abortTransaction();
+            await session.abortTransaction();
             next(error);
+        }
+        finally {
+            session.endSession();
         }
     }
     async getStudentWithPopulated(req, res, next) {

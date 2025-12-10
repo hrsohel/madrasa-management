@@ -1,9 +1,10 @@
+import { ClientSession } from "mongoose";
 import { StudentRepostitory } from "../Repositories/Student.repository";
 const studentRepo = new StudentRepostitory()
 
 export class StudentService {
-    async addStudent(bodyData: any) {
-        return await studentRepo.createDocs(bodyData)
+    async addStudent(bodyData: any, session?: ClientSession) {
+        return await studentRepo.createDocs(bodyData, session)
     }
     async findStudentId(id: string) {
         return await studentRepo.findById(id)

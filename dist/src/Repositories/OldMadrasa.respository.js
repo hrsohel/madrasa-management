@@ -10,5 +10,8 @@ class OldMadrasaRepository extends BaseRepository_1.BaseRepository {
     constructor() {
         super(OldMadrasaInfo_model_1.default);
     }
+    async updateOldMadrasaInfo(bodyData) {
+        return await OldMadrasaInfo_model_1.default.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true });
+    }
 }
 exports.OldMadrasaRepository = OldMadrasaRepository;

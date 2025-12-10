@@ -23,7 +23,7 @@ export interface IStudent extends Document {
   session: string;
   createdAt?: Date;
   updatedAt?: Date;
-  
+  profileImage: string
 }
 
 const StudentSchema = new Schema<IStudent>(
@@ -140,6 +140,10 @@ const StudentSchema = new Schema<IStudent>(
       required: [true, 'Session is required'],
       // match: [/^\d{2}-\d{2}$/, 'Session format must be YYYY-YY (e.g., 25-26)'],
     },
+    profileImage: {
+      type: String,
+      default: null
+    }
   },
   {
     timestamps: true,

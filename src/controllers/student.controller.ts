@@ -16,13 +16,14 @@ export class StudentController {
     async addStudent(req: Request, res: Response, next: NextFunction) {
         const session = await mongoose.startSession()
         try {
+            req.body.profileImage = (req as any).file ? `/uploads/${(req as any).file.filename}` : null
             session.startTransaction()
-            const student = await studentService.addStudent(req.body.student)
-            await guardianService.addGuardian({ ...req.body.guardian, student: student._id })
-            await addressService.addAddress({ ...req.body.address, student: student._id })
-            await madrasaService.addMadrasaInfo({ ...req.body.madrasa, student: student._id })
-            await feesService.addFees({ ...req.body.fees, student: student._id })
-            session.commitTransaction()
+            const student = await studentService.addStudent({...req.body.student, profileImage: req.body.profileImage}, session)
+            await guardianService.addGuardian({ ...req.body.guardian, student: student._id }, session)
+            await addressService.addAddress({ ...req.body.address, student: student._id }, session)
+            await madrasaService.addMadrasaInfo({ ...req.body.madrasa, student: student._id }, session)
+            await feesService.addFees({ ...req.body.fees, student: student._id }, session)
+            await session.commitTransaction()
             return res.status(201).json({
                 status: 201,
                 success: true,
@@ -30,8 +31,10 @@ export class StudentController {
                 data: []
             })
         } catch (error: unknown) {
-            session.abortTransaction()
+            await session.abortTransaction()
             next(error as Error)
+        } finally {
+            session.endSession()
         }
     }
     async getStudentWithPopulated(req: Request, res: Response, next: NextFunction) {

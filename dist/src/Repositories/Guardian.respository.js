@@ -10,5 +10,8 @@ class GuardianRepository extends BaseRepository_1.BaseRepository {
     constructor() {
         super(Guardian_model_1.default);
     }
+    async updateGuardian(bodyData) {
+        return await Guardian_model_1.default.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true });
+    }
 }
 exports.GuardianRepository = GuardianRepository;

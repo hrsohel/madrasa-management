@@ -5,4 +5,7 @@ export class FeesRepository extends BaseRepository<IFees> {
  constructor() {
     super(Fees)
  }
+ async updateFees(bodyData: any) {
+    return await Fees.findOneAndUpdate({_id: bodyData._id}, {$set: bodyData}, {new: true})
+ }
 }
