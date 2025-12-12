@@ -6,11 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const student_route_1 = require("../routes/student.route");
+const index_1 = __importDefault(require("./routes/index"));
 const mongoose_error_1 = require("./middlewares/mongoose.error");
 dotenv_1.default.config();
 const cors_1 = __importDefault(require("cors"));
-const router = new student_route_1.Routes();
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -21,21 +20,21 @@ class Server {
     }
     configureMiddleware() {
         this.app.use((0, cors_1.default)({
-            origin: "*"
+            origin: "*",
         }));
         this.app.use(express_1.default.json({ limit: "10mb" }));
         this.app.use(express_1.default.urlencoded({ extended: true }));
-        this.app.use('/uploads', express_1.default.static('uploads'));
+        this.app.use("/uploads", express_1.default.static("uploads"));
     }
     configureRoutes() {
         this.app.get("/health", (req, res) => {
             res.status(200).json({
                 status: "OK. Yahoo! It's running.",
                 uptime: process.uptime(),
-                timestamps: new Date().toISOString()
+                timestamps: new Date().toISOString(),
             });
         });
-        this.app.use("/api/v1", router.getRouter());
+        this.app.use("/api/v1", index_1.default);
     }
     configureErrorHandling() {
         // this.app.use('*', (req: Request, res: Response) => {
@@ -62,9 +61,10 @@ class Server {
         this.server = this.app.listen(this.PORT, () => console.log(`Server listening at http://localhost:${this.PORT}`));
     }
     startMongoDB() {
-        mongoose_1.default.connect(process.env.MONGO_URL)
+        mongoose_1.default
+            .connect(process.env.MONGO_URL)
             .then(() => console.log("Database connected successfully."))
-            .catch(error => console.log("Database error: ", error));
+            .catch((error) => console.log("Database error: ", error));
     }
     getApp() {
         return this.app;
@@ -72,7 +72,7 @@ class Server {
     stop() {
         if (this.server) {
             this.server.close(() => {
-                console.log('Server stopped');
+                console.log("Server stopped");
             });
         }
     }

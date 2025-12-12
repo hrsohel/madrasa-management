@@ -5,18 +5,22 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx watch src/app.ts",
-    "start": "node dist/app.js",
+    "start": "node dist/src/app.js",
     "server": "nodemon dist/app.js",
     "build": "tsc"
   },
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/nodemailer": "^7.0.4",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.11",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
