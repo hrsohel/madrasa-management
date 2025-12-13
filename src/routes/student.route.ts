@@ -10,6 +10,7 @@ import { GuardianController } from "../controllers/guardian.controller";
 import { OldMadrasaInfoController } from "../controllers/oldMadrasaInfo.controller";
 import { madrasaSettingsController } from "../controllers/madrasaSettings.controller";
 import { upload } from "../middlewares/upload";
+import { IDcontroller } from "../controllers/ID.controller";
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ const guardianController = new GuardianController();
 const addressController = new AddressController();
 const feesController = new FeesController();
 const oldMadrasaInfoController = new OldMadrasaInfoController();
+const idController = new IDcontroller()
 
 router.post(
   "/students/add-student",
@@ -90,5 +92,6 @@ router.patch(
   upload.single("logo"),
   madrasaSettingsController.update
 );
+router.get("/get-id", idController.updateID)
 
 export const StudentRoutes = router;

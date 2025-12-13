@@ -20,7 +20,7 @@ const getAdminPanelData = async (req: Request, res: Response) => {
 
 const createNewInstitution = async (req: Request, res: Response) => {
   try {
-    console.log(req.body)
+    
     const { email, password, fullName, totalStudents } = req.body;
     const result = await AdminService.createNewInstitution(
       email,
