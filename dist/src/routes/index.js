@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const user_route_1 = require("./user.route");
 const student_route_1 = require("./student.route");
 const Admin_route_1 = require("./Admin.route");
+const prePlannedFees_route_1 = require("./prePlannedFees.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -21,6 +22,10 @@ const moduleRoutes = [
         path: "/admin",
         route: Admin_route_1.AdminRoutes,
     },
+    {
+        path: "/fees",
+        route: prePlannedFees_route_1.FeesRoute,
+    }
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 exports.default = router;

@@ -12,7 +12,7 @@ const login = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error: any) {
-    res.status(400).json({
+    res.status(200).json({
       success: false,
       message: "User login failed",
       error: error.message,

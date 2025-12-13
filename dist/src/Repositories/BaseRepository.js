@@ -24,11 +24,11 @@ class BaseRepository extends BaseRepositoryAbstraction {
         return await this.model.find().lean().exec();
     }
     async filterDocs(filter) {
-        let { page = 1, limit = 10 } = filter;
+        let { page = 1, limit = 100 } = filter;
         if (!page)
             page = 1;
         if (!limit)
-            limit = 10;
+            limit = 100;
         const skip = Math.abs((Number(page) - 1) * Number(limit));
         delete filter.page;
         delete filter.limit;
