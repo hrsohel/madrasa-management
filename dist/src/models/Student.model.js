@@ -82,7 +82,6 @@ const StudentSchema = new mongoose_1.Schema({
     },
     class: {
         type: String,
-        required: [true, 'Class is required']
     },
     shift: {
         type: String,

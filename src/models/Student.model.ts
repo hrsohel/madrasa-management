@@ -113,7 +113,6 @@ const StudentSchema = new Schema<IStudent>(
 
     class: {
       type: String,
-      required: [true, 'Class is required']
     },
 
     shift: {
