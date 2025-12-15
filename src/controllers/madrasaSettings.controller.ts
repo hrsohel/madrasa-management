@@ -27,6 +27,7 @@ class MadrasaSettingsController {
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const logoPath = (req as any).file ? `/uploads/${(req as any).file.filename}` : undefined;
+      console.log(logoPath)
       const madrasa = await madrasaSettingsService.update(req.body, logoPath);
       if (!madrasa) {
         return res.status(404).json({ message: 'Madrasa not found to update' });

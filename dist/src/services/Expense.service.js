@@ -4,8 +4,8 @@ exports.ExpenseService = void 0;
 const Expense_repository_1 = require("../Repositories/Expense.repository");
 const expenseRepository = new Expense_repository_1.ExpenseRepository();
 class ExpenseService {
-    async addExpense(bodyData) {
-        return await expenseRepository.createDocs(bodyData);
+    async addExpense(bodyData, session) {
+        return await expenseRepository.createDocs(bodyData, session);
     }
     async getSingleExpense(roshidNo) {
         return await expenseRepository.filterDocs({ roshidNo });

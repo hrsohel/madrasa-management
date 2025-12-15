@@ -1,10 +1,11 @@
+import { ClientSession } from "mongoose";
 import { ExpenseRepository } from "../Repositories/Expense.repository";
 
 const expenseRepository = new ExpenseRepository()
 
 export class ExpenseService {
-    async addExpense(bodyData: any) {
-        return await expenseRepository.createDocs(bodyData)
+    async addExpense(bodyData: any, session?: ClientSession) {
+        return await expenseRepository.createDocs(bodyData, session)
     }
 
     async getSingleExpense(roshidNo: string) {

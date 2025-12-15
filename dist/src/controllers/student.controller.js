@@ -10,12 +10,24 @@ const Address_service_1 = require("../services/Address.service");
 const Madrasa_service_1 = require("../services/Madrasa.service");
 const Fees_service_1 = require("../services/Fees.service");
 const mongoose_1 = __importDefault(require("mongoose"));
+const Income_service_1 = require("../services/Income.service");
+const Expense_service_1 = require("../services/Expense.service");
 const studentService = new Student_service_1.StudentService();
 const guardianService = new Guardian_service_1.GuardianService();
 const addressService = new Address_service_1.AddressService();
 const madrasaService = new Madrasa_service_1.MadrasaService();
 const feesService = new Fees_service_1.FeesService();
+const incomeService = new Income_service_1.IncomeService();
+const expenseService = new Expense_service_1.ExpenseService();
 class StudentController {
+    toBanglaNumber(num) {
+        const banglaDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+        return num
+            .toString()
+            .split("")
+            .map((d) => (/\d/.test(d) ? banglaDigits[Number(d)] : d))
+            .join("");
+    }
     async addStudent(req, res, next) {
         const session = await mongoose_1.default.startSession();
         try {
@@ -26,12 +38,28 @@ class StudentController {
             await addressService.addAddress({ ...req.body.address, student: student._id }, session);
             await madrasaService.addMadrasaInfo({ ...req.body.madrasa, student: student._id }, session);
             await feesService.addFees({ ...req.body.fees, student: student._id }, session);
+            const feeFields = [
+                "admissionFee",
+                "booksFee",
+                "ITFee",
+                "IDCardFee",
+                "libraryFee",
+                "kafelaFee",
+                "confirmFee",
+            ];
+            const totalFee = feeFields.reduce((sum, field) => {
+                return sum + Number(req.body.fees[field] || 0);
+            }, 0);
+            const helpAmount = Number(req.body.fees.helpAmount || 0);
+            const finalIncome = totalFee - helpAmount;
+            await incomeService.addIncome({ amount: finalIncome, sectorName: "ভর্তি" }, session);
+            await expenseService.addExpense({ amount: helpAmount, sectorName: req.body.fees.helpType }, session);
             await session.commitTransaction();
             return res.status(201).json({
                 status: 201,
                 success: true,
                 messages: "student added",
-                data: []
+                data: [],
             });
         }
         catch (error) {
@@ -44,12 +72,14 @@ class StudentController {
     }
     async getStudentWithPopulated(req, res, next) {
         try {
-            const data = await studentService.findStudentWithIdentifier({ _id: req.params.id });
+            const data = await studentService.findStudentWithIdentifier({
+                _id: req.params.id,
+            });
             return res.status(201).json({
                 status: 200,
                 success: true,
                 messages: "student data",
-                data: data
+                data: data,
             });
         }
         catch (error) {
@@ -58,12 +88,15 @@ class StudentController {
     }
     async updateStudent(req, res, next) {
         try {
-            const updatedUser = await studentService.updateStudent({ ...req.body, _id: req.params.id });
+            const updatedUser = await studentService.updateStudent({
+                ...req.body,
+                _id: req.params.id,
+            });
             return res.status(201).json({
                 status: 201,
                 success: true,
                 messages: "student data updated",
-                data: updatedUser
+                data: updatedUser,
             });
         }
         catch (error) {
@@ -77,7 +110,7 @@ class StudentController {
                 status: 200,
                 message: "all student data",
                 success: true,
-                data: results
+                data: results,
             });
         }
         catch (error) {

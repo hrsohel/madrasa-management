@@ -1,10 +1,11 @@
+import { ClientSession } from "mongoose";
 import { IncomeRespository } from "../Repositories/Income.repository"
 
 const incomeRepository = new IncomeRespository()
 
 export class IncomeService {
-    async addIncome(bodyData: any) {
-        return await incomeRepository.createDocs(bodyData)
+    async addIncome(bodyData: any, session?: ClientSession) {
+        return await incomeRepository.createDocs(bodyData, session)
     }
 
     async getSingleIncome(roshidNo: string) {

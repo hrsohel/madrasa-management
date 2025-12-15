@@ -4,8 +4,8 @@ exports.IncomeService = void 0;
 const Income_repository_1 = require("../Repositories/Income.repository");
 const incomeRepository = new Income_repository_1.IncomeRespository();
 class IncomeService {
-    async addIncome(bodyData) {
-        return await incomeRepository.createDocs(bodyData);
+    async addIncome(bodyData, session) {
+        return await incomeRepository.createDocs(bodyData, session);
     }
     async getSingleIncome(roshidNo) {
         return await incomeRepository.filterDocs({ roshidNo });
