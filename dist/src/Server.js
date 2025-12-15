@@ -61,6 +61,7 @@ class Server {
         this.server = this.app.listen(this.PORT, () => console.log(`Server listening at http://localhost:${this.PORT}`));
     }
     startMongoDB() {
+        console.log(process.env.MONGO_URL);
         mongoose_1.default
             .connect(process.env.MONGO_URL)
             .then(() => console.log("Database connected successfully."))

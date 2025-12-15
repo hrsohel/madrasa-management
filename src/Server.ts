@@ -75,6 +75,7 @@ class Server {
     );
   }
   public startMongoDB(): void {
+    console.log(process.env.MONGO_URL)
     mongoose
       .connect(process.env.MONGO_URL as string)
       .then(() => console.log("Database connected successfully."))
