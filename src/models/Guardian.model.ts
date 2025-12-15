@@ -35,14 +35,14 @@ const GuardianSchema = new Schema<IGuardian>(
         // Father
         fatherName: {
             type: String,
-            required: [true, "Father's name is required"],
+            // required: [true, "Father's name is required"],
             trim: true,
             minlength: [3, "Father's name too short"],
             maxlength: [50, "Father's name too long"],
         },
         fatherNID: {
             type: String,
-            required: [true, "Father's NID is required"],
+            // required: [true, "Father's NID is required"],
             // validate: {
             //     validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
             //     message: 'Father NID must be 10, 13, or 17 digits',
@@ -64,13 +64,13 @@ const GuardianSchema = new Schema<IGuardian>(
         // Mother
         motherName: {
             type: String,
-            required: [true, "Mother's name is required"],
+            // required: [true, "Mother's name is required"],
             trim: true,
             minlength: [3, "Mother's name too short"],
         },
         motherNID: {
             type: String,
-            required: [true, "Mother's NID is required"],
+            // required: [true, "Mother's NID is required"],
             // validate: {
             //     validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
             //     message: 'Mother NID must be 10, 13, or 17 digits',
@@ -91,12 +91,12 @@ const GuardianSchema = new Schema<IGuardian>(
         // Main Guardian (the one we contact)
         guardianName: {
             type: String,
-            required: [true, 'Guardian name is required'],
+            // required: [true, 'Guardian name is required'],
             trim: true,
         },
         guardianNID: {
             type: String,
-            required: [true, 'Guardian NID is required'],
+            // required: [true, 'Guardian NID is required'],
             // validate: {
             //     validator: (v: string) => /^\d{10}$|^\d{13}$|^\d{17}$/.test(v),
             //     message: 'Guardian NID must be 10, 13, or 17 digits',
@@ -104,7 +104,7 @@ const GuardianSchema = new Schema<IGuardian>(
         },
         guardianPhone: {
             type: String,
-            required: [true, 'Guardian phone is required'],
+            // required: [true, 'Guardian phone is required'],
             // validate: {
             //     validator: (v: string) => /^01[3-9]\d{8}$/.test(v),
             //     message: 'Invalid Bangladeshi mobile number (e.g., 017xxxxxxxx)',
@@ -112,7 +112,7 @@ const GuardianSchema = new Schema<IGuardian>(
         },
         guardianRelation: {
             type: String,
-            required: [true, 'Guardian relation is required'],
+            // required: [true, 'Guardian relation is required'],
             // enum: {
             //     values: ['Father', 'Mother', 'Uncle', 'Aunt', 'Grandfather', 'Grandmother', 'Other'],
             //     message: 'Invalid guardian relation',

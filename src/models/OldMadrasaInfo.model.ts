@@ -30,13 +30,13 @@ const OldMadrasaInfoSchema = new Schema<IOldMadrasaInfo>(
     student: {
       type: Schema.Types.ObjectId,
       ref: 'Student',
-      required: [true, 'Student reference is required'],
+      // required: [true, 'Student reference is required'],
       unique: true, // One record per student
     },
 
     oldMadrasaName: {
       type: String,
-      required: [true, 'Previous madrasa/school name is required'],
+      // required: [true, 'Previous madrasa/school name is required'],
       trim: true,
       minlength: [3, 'Madrasa name too short'],
       maxlength: [100, 'Madrasa name too long'],
@@ -44,35 +44,35 @@ const OldMadrasaInfoSchema = new Schema<IOldMadrasaInfo>(
 
     oldMadrasaClass: {
       type: String,
-      required: [true, 'Previous class is required']
+      // required: [true, 'Previous class is required']
     },
 
     oldMadrasaResult: {
       type: String,
-      required: [true, 'Previous result is required']
+      // required: [true, 'Previous result is required']
     },
 
     talimiGuardianName: {
       type: String,
-      required: [true, 'Talimi guardian name is required'],
+      // required: [true, 'Talimi guardian name is required'],
       trim: true,
       minlength: [3, 'Name too short'],
     },
 
     talimiGuardianPhone: {
       type: String,
-      required: [true, 'Talimi guardian phone is required']
+      // required: [true, 'Talimi guardian phone is required']
     },
 
     admissionExaminer: {
       type: String,
-      required: [true, 'Examiner name is required'],
+      // required: [true, 'Examiner name is required'],
       trim: true,
     },
 
     admissionResult: {
       type: String,
-      required: [true, 'Admission result is required']
+      // required: [true, 'Admission result is required']
     },
 
     notes: {

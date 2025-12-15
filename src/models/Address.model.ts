@@ -37,27 +37,27 @@ const AddressSchema = new Schema<IAddress>(
     // Present Address
     presentDivision: {
       type: String,
-      required: [true, 'Present division is required'],
+      // required: [true, 'Present division is required'],
     },
     presentDistrict: {
       type: String,
-      required: [true, 'Present district is required'],
+      // required: [true, 'Present district is required'],
       trim: true,
       minlength: [2, 'District name too short'],
     },
     presentUpazila: {
       type: String,
-      required: [true, 'Present upazila is required'],
+      // required: [true, 'Present upazila is required'],
       trim: true,
     },
     presentUnion: {
       type: String,
-      required: [true, 'Present union is required'],
+      // required: [true, 'Present union is required'],
       trim: true,
     },
     presentVillage: {
       type: String,
-      required: [true, 'Present village/ward is required'],
+      // required: [true, 'Present village/ward is required'],
       trim: true,
     },
     presentOthers: {
@@ -68,26 +68,26 @@ const AddressSchema = new Schema<IAddress>(
     // Permanent Address
     permanentDivision: {
       type: String,
-      required: [true, 'Permanent division is required'],
+      // required: [true, 'Permanent division is required'],
     },
     permanentDistrict: {
       type: String,
-      required: [true, 'Permanent district is required'],
+      // required: [true, 'Permanent district is required'],
       trim: true,
     },
     permanentUpazila: {
       type: String,
-      required: [true, 'Permanent upazila is required'],
+      // required: [true, 'Permanent upazila is required'],
       trim: true,
     },
     permanentUnion: {
       type: String,
-      required: [true, 'Permanent union is required'],
+      // required: [true, 'Permanent union is required'],
       trim: true,
     },
     permanentVillage: {
       type: String,
-      required: [true, 'Permanent village/ward is required'],
+      // required: [true, 'Permanent village/ward is required'],
       trim: true,
     },
     permanentOthers: {

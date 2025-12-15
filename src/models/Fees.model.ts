@@ -21,60 +21,60 @@ const FeesSchema = new Schema<IFees>(
     student: {
       type: Schema.Types.ObjectId,
       ref: 'Student',
-      required: true,
+      // required: true,
       unique: true,
     },
 
     admissionFee: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
 
     libraryFee: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
 
     confirmFee: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
 
     ITFee: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
 
     IDCardFee: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
 
     kafelaFee: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
 
     booksFee: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
 
     helpType: {
       type: String,
-      required: true,
+      // required: true,
       default: 'None',
     },
     helpAmount: {
       type: Number,
-      required: true,
+      // required: true,
       default: 0,
       min: 0
     },

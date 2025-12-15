@@ -9,14 +9,14 @@ const DIVISION = ['Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 'Barisal', 'Sylhe
 const StudentSchema = new mongoose_1.Schema({
     name: {
         type: String,
-        required: [true, 'Student name is required'],
+        // required: [true, 'Student name is required'],
         trim: true,
         minlength: [3, 'Name must be at least 3 characters'],
         maxlength: [50, 'Name cannot exceed 50 characters'],
     },
     dob: {
         type: Date,
-        required: [true, 'Date of birth is required'],
+        // required: [true, 'Date of birth is required'],
         validate: {
             validator: (date) => date < new Date(),
             message: 'Date of birth cannot be in the future',
@@ -37,7 +37,7 @@ const StudentSchema = new mongoose_1.Schema({
     },
     gender: {
         type: String,
-        required: [true, 'Gender is required'],
+        // required: [true, 'Gender is required'],
         enum: {
             values: GENDER,
             message: 'Gender must be Male or Female',
@@ -45,7 +45,7 @@ const StudentSchema = new mongoose_1.Schema({
     },
     bloodGroup: {
         type: String,
-        required: [true, 'Blood group is required'],
+        // required: [true, 'Blood group is required'],
         enum: {
             values: BLOOD_GROUP,
             message: 'Invalid blood group',
@@ -53,7 +53,7 @@ const StudentSchema = new mongoose_1.Schema({
     },
     phone: {
         type: String,
-        required: [true, 'Guardian phone is required'],
+        // required: [true, 'Guardian phone is required'],
         // validate: {
         //   validator: (v: string) => /^(\+8801|01)[3-9]\d{8}$/.test(v),
         //   message: 'Invalid Bangladeshi mobile number (e.g., 017XXXXXXXX)',
@@ -61,14 +61,14 @@ const StudentSchema = new mongoose_1.Schema({
     },
     uid: {
         type: String,
-        required: [true, "ID is required"],
+        // required: [true, "ID is required"],
         unique: true,
         uppercase: true,
         // match: [/^STD-\d{4}-\d{5}$/, 'UID must follow format: STD-2025-00001'],
     },
     residential: {
         type: String,
-        required: [true, 'Residential status is required'],
+        // required: [true, 'Residential status is required'],
         // enum: {
         //   values: ['Day Scholar', 'Hostel', 'Residential'],
         //   message: 'Residential must be Day Scholar, Hostel or Residential',
@@ -76,7 +76,7 @@ const StudentSchema = new mongoose_1.Schema({
     },
     roll: {
         type: String,
-        required: true,
+        // required: true,
         // unique: true,
         // match: [/^\d{4,6}$/, 'Roll must be numeric (e.g., 001 or 2025001)'],
     },
@@ -85,7 +85,7 @@ const StudentSchema = new mongoose_1.Schema({
     },
     shift: {
         type: String,
-        required: [true, 'Shift is required'],
+        // required: [true, 'Shift is required'],
         // enum: {
         //   values: SHIFT,
         //   message: 'Shift must be Morning, Day or Evening',
@@ -93,15 +93,15 @@ const StudentSchema = new mongoose_1.Schema({
     },
     section: {
         type: String,
-        required: [true, 'Section is required']
+        // required: [true, 'Section is required']
     },
     division: {
         type: String,
-        required: [true, 'Division is required']
+        // required: [true, 'Division is required']
     },
     session: {
         type: String,
-        required: [true, 'Session is required'],
+        // required: [true, 'Session is required'],
         // match: [/^\d{2}-\d{2}$/, 'Session format must be YYYY-YY (e.g., 25-26)'],
     },
     profileImage: {
