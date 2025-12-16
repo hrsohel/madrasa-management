@@ -14,7 +14,7 @@ const IncomeSchema = new Schema<IIncome>({
     roshidNo: {
         type: String,
         default: null,
-        unique: true
+        // unique: true
     },
     donorName: {
         type: String,

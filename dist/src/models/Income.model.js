@@ -5,7 +5,7 @@ const IncomeSchema = new mongoose_1.Schema({
     roshidNo: {
         type: String,
         default: null,
-        unique: true
+        // unique: true
     },
     donorName: {
         type: String,

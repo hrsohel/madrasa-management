@@ -26,7 +26,7 @@ export class StudentController {
         .join("");
     }
   async addStudent(req: Request, res: Response, next: NextFunction) {
-    
+    console.log(req.body)
     const session = await mongoose.startSession();
     try {
       req.body.profileImage = (req as any).file ? `/uploads/${(req as any).file.filename}` : null
@@ -52,8 +52,8 @@ export class StudentController {
       const helpAmount = Number(req.body.fees.helpAmount || 0);
 
       const finalIncome = totalFee - helpAmount;
-      await incomeService.addIncome({amount: finalIncome, sectorName: "ভর্তি"}, session)
-      await expenseService.addExpense({amount: helpAmount, sectorName: req.body.fees.helpType}, session)
+      // await incomeService.addIncome({amount: Math.abs(finalIncome), sectorName: "ভর্তি"}, session)
+      // await expenseService.addExpense({amount: helpAmount, sectorName: req.body.fees.helpType}, session)
       await session.commitTransaction()
 
       return res.status(201).json({
