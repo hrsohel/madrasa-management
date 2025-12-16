@@ -28,8 +28,25 @@ class MadrasaSettingsService {
     if (logoPath) {
       data.logo = logoPath;
     }
-    
+
     return madrasaSettingsRepository.update(data);
+  }
+
+  async addFee(feeName: string, amount: number) {
+    if (!feeName || typeof feeName !== 'string') {
+      throw new Error('Valid fee name is required');
+    }
+    if (typeof amount !== 'number' || amount < 0) {
+      throw new Error('Valid positive amount is required');
+    }
+    return madrasaSettingsRepository.addFee(feeName, amount);
+  }
+
+  async removeFee(feeName: string) {
+    if (!feeName || typeof feeName !== 'string') {
+      throw new Error('Valid fee name is required');
+    }
+    return madrasaSettingsRepository.removeFee(feeName);
   }
 }
 

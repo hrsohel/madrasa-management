@@ -92,6 +92,14 @@ router.patch(
   upload.single("logo"),
   madrasaSettingsController.update
 );
+router.post(
+  "/madrasa-settings/fees",
+  madrasaSettingsController.addFee
+);
+router.delete(
+  "/madrasa-settings/fees/:feeName",
+  madrasaSettingsController.removeFee
+);
 router.get("/get-id", idController.updateID)
 
 export const StudentRoutes = router;

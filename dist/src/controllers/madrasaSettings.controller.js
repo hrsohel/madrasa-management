@@ -39,5 +39,25 @@ class MadrasaSettingsController {
             next(error);
         }
     }
+    async addFee(req, res, next) {
+        try {
+            const { feeName, amount } = req.body;
+            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.addFee(feeName, amount);
+            res.status(200).json(madrasa);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async removeFee(req, res, next) {
+        try {
+            const { feeName } = req.params;
+            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.removeFee(feeName);
+            res.status(200).json(madrasa);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
 }
 exports.madrasaSettingsController = new MadrasaSettingsController();

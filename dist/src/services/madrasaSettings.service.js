@@ -30,5 +30,20 @@ class MadrasaSettingsService {
         }
         return madrasaSettings_repository_1.madrasaSettingsRepository.update(data);
     }
+    async addFee(feeName, amount) {
+        if (!feeName || typeof feeName !== 'string') {
+            throw new Error('Valid fee name is required');
+        }
+        if (typeof amount !== 'number' || amount < 0) {
+            throw new Error('Valid positive amount is required');
+        }
+        return madrasaSettings_repository_1.madrasaSettingsRepository.addFee(feeName, amount);
+    }
+    async removeFee(feeName) {
+        if (!feeName || typeof feeName !== 'string') {
+            throw new Error('Valid fee name is required');
+        }
+        return madrasaSettings_repository_1.madrasaSettingsRepository.removeFee(feeName);
+    }
 }
 exports.madrasaSettingsService = new MadrasaSettingsService();

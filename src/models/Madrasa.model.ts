@@ -24,6 +24,10 @@ export interface IMadrasa extends Document {
     phone: string; // Stored as string to preserve leading zeros & country codes
   };
 
+  fees: {
+    [key: string]: number;
+  };
+
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
@@ -35,13 +39,13 @@ const MadrasaSchema = new Schema<IMadrasa>(
     logo: {
       type: String,
       default: null
-    //   validate: {
-    //     validator: function (v: string) {
-    //       if (!v) return true; // optional
-    //       return /\.(png|jpe?g)$/i.test(v) && v.includes('1200x1200');
-    //     },
-    //     message: 'Logo must be 1200x1200 and in PNG/JPG format',
-    //   },
+      //   validate: {
+      //     validator: function (v: string) {
+      //       if (!v) return true; // optional
+      //       return /\.(png|jpe?g)$/i.test(v) && v.includes('1200x1200');
+      //     },
+      //     message: 'Logo must be 1200x1200 and in PNG/JPG format',
+      //   },
     },
 
     name: {
@@ -70,6 +74,11 @@ const MadrasaSchema = new Schema<IMadrasa>(
         trim: true,
         // match: [/^\+?[0-9]{10,15}$/, 'Please provide a valid phone number'],
       },
+    },
+
+    fees: {
+      type: Schema.Types.Mixed,
+      default: {}
     },
   },
   {

@@ -16,5 +16,22 @@ class MadrasaSettingsRepository {
     async update(data) {
         return Madrasa_model_1.Madrasa.findOneAndUpdate({}, data, { new: true, runValidators: true });
     }
+    async addFee(feeName, amount) {
+        const existing = await this.get();
+        if (!existing) {
+            throw new Error('Madrasa settings not found. Please create settings first.');
+        }
+        const updatedFees = { ...existing.fees, [feeName]: amount };
+        return Madrasa_model_1.Madrasa.findByIdAndUpdate(existing._id, { $set: { fees: updatedFees } }, { new: true, runValidators: true });
+    }
+    async removeFee(feeName) {
+        const existing = await this.get();
+        if (!existing) {
+            throw new Error('Madrasa settings not found.');
+        }
+        const updatedFees = { ...existing.fees };
+        delete updatedFees[feeName];
+        return Madrasa_model_1.Madrasa.findByIdAndUpdate(existing._id, { $set: { fees: updatedFees } }, { new: true, runValidators: true });
+    }
 }
 exports.madrasaSettingsRepository = new MadrasaSettingsRepository();

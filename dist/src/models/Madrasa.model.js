@@ -40,6 +40,10 @@ const MadrasaSchema = new mongoose_1.Schema({
             // match: [/^\+?[0-9]{10,15}$/, 'Please provide a valid phone number'],
         },
     },
+    fees: {
+        type: mongoose_1.Schema.Types.Mixed,
+        default: {}
+    },
 }, {
     timestamps: true, // automatically adds createdAt & updatedAt
 });

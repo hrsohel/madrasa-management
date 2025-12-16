@@ -46,5 +46,7 @@ router.get("/financials/summary", financialsController.getFinancialSummary.bind(
 router.get("/madrasa-settings", madrasaSettings_controller_1.madrasaSettingsController.get);
 router.post("/madrasa-settings", upload_1.upload.single("logo"), madrasaSettings_controller_1.madrasaSettingsController.create);
 router.patch("/madrasa-settings", upload_1.upload.single("logo"), madrasaSettings_controller_1.madrasaSettingsController.update);
+router.post("/madrasa-settings/fees", madrasaSettings_controller_1.madrasaSettingsController.addFee);
+router.delete("/madrasa-settings/fees/:feeName", madrasaSettings_controller_1.madrasaSettingsController.removeFee);
 router.get("/get-id", idController.updateID);
 exports.StudentRoutes = router;
