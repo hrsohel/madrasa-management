@@ -12,7 +12,6 @@ abstract class BaseRepository<T extends Document> extends BaseRepositoryAbstract
   constructor(protected readonly model: Model<T>) { super() }
 
   async createDocs(bodyData: Partial<T>, session?: ClientSession): Promise<T> {
-    console.log(bodyData)
     const doc = new this.model(bodyData);
     return await doc.save(session ? { session } : undefined);
   }

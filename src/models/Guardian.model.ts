@@ -37,7 +37,7 @@ const GuardianSchema = new Schema<IGuardian>(
             type: String,
             // required: [true, "Father's name is required"],
             trim: true,
-            minlength: [3, "Father's name too short"],
+            // minlength: [3, "Father's name too short"],
             maxlength: [50, "Father's name too long"],
         },
         fatherNID: {
@@ -66,7 +66,7 @@ const GuardianSchema = new Schema<IGuardian>(
             type: String,
             // required: [true, "Mother's name is required"],
             trim: true,
-            minlength: [3, "Mother's name too short"],
+            // minlength: [3, "Mother's name too short"],
         },
         motherNID: {
             type: String,

@@ -16,11 +16,10 @@ const login = async (email, password) => {
         throw new Error("User not found");
     }
     const isPasswordMatch = await bcrypt_1.default.compare(password, user.password);
-    console.log(user.password, password, isPasswordMatch);
     if (!isPasswordMatch) {
         throw new Error("Invalid credentials");
     }
-    const token = jsonwebtoken_1.default.sign({ id: user._id, role: user.role }, "your-secret-key", {
+    const token = jsonwebtoken_1.default.sign({ id: user._id, role: user.role, email: user.email }, process.env.TOKEN_SECRET, {
         expiresIn: "1d",
     });
     return {

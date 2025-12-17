@@ -33,6 +33,28 @@ router.post(
   upload.single("profileImage"),
   studentController.addStudent.bind(studentController)
 );
+
+router.post(
+  "/students/save-draft",
+  upload.single("profileImage"),
+  studentController.saveDraft.bind(studentController)
+);
+
+router.get(
+  "/students/get-drafts",
+  studentController.getDrafts.bind(studentController)
+);
+
+router.get(
+  "/students/get-draft/:id",
+  studentController.getDraftById.bind(studentController)
+);
+
+router.delete(
+  "/students/delete-draft/:id",
+  studentController.deleteDraft.bind(studentController)
+);
+
 router.get(
   "/students/get_student_with_guardian_address/:id",
   studentController.getStudentWithPopulated.bind(studentController)
@@ -41,6 +63,12 @@ router.put(
   "/students/update-student/:id",
   upload.single("profileImage"),
   studentController.updateStudent.bind(studentController)
+);
+
+router.put(
+  "/students/update-full-details/:id",
+  upload.single("profileImage"),
+  studentController.updateFullDetails.bind(studentController)
 );
 router.put(
   "/guardians/update-guardian/:id",

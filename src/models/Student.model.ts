@@ -24,7 +24,12 @@ export interface IStudent extends Document {
   createdAt?: Date;
   updatedAt?: Date;
   profileImage: string;
-  userId: Types.ObjectId;
+  userId: string;
+  status: 'active' | 'draft' | 'archived';
+  guardian?: any[];
+  addresse?: any[];
+  fees?: any;
+  oldMadrasaInfo?: any[];
 }
 
 const StudentSchema = new Schema<IStudent>(
@@ -40,10 +45,10 @@ const StudentSchema = new Schema<IStudent>(
     dob: {
       type: Date,
       // required: [true, 'Date of birth is required'],
-      validate: {
-        validator: (date: Date) => date < new Date(),
-        message: 'Date of birth cannot be in the future',
-      },
+      // validate: {
+      //   validator: (date: Date) => date < new Date(),
+      //   message: 'Date of birth cannot be in the future',
+      // },
     },
 
     nid: {
@@ -145,15 +150,25 @@ const StudentSchema = new Schema<IStudent>(
       default: null
     },
     userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
+    status: {
+      type: String,
+      enum: ['active', 'draft', 'archived'],
+      default: 'active'
+    },
+    // Embedded fields for drafts
+    guardian: { type: [Schema.Types.Mixed], default: [] },
+    addresse: { type: [Schema.Types.Mixed], default: [] },
+    fees: { type: Schema.Types.Mixed, default: {} },
+    oldMadrasaInfo: { type: [Schema.Types.Mixed], default: [] }
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    strict: false // Allow saving fields not defined in schema (for drafts)
   }
 );
 

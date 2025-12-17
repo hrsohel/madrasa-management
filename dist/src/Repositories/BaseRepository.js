@@ -10,7 +10,6 @@ class BaseRepository extends BaseRepositoryAbstraction {
         this.model = model;
     }
     async createDocs(bodyData, session) {
-        console.log(bodyData);
         const doc = new this.model(bodyData);
         return await doc.save(session ? { session } : undefined);
     }

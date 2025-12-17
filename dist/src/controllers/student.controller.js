@@ -12,8 +12,6 @@ const Fees_service_1 = require("../services/Fees.service");
 const mongoose_1 = __importDefault(require("mongoose"));
 const Income_service_1 = require("../services/Income.service");
 const Expense_service_1 = require("../services/Expense.service");
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const studentService = new Student_service_1.StudentService();
 const guardianService = new Guardian_service_1.GuardianService();
 const addressService = new Address_service_1.AddressService();
@@ -101,46 +99,110 @@ class StudentController {
         }
     }
     async updateStudent(req, res, next) {
+        // Calling updateFullDetails internally as the logic is now unified
+        return this.updateFullDetails(req, res, next);
+    }
+    async updateFullDetails(req, res, next) {
+        const session = await mongoose_1.default.startSession();
         try {
+            session.startTransaction();
+            console.log('Update Body:', req.body);
+            // 1. Update Student
+            // Handle student array if present (unlikely for student, but consistency)
+            let studentBody = req.body.student;
+            if (Array.isArray(studentBody))
+                studentBody = studentBody[0];
+            if (!studentBody)
+                studentBody = {};
             const userId = req.user.id;
-            if (req.file) {
-                // Fetch existing student to get old image path
-                const existingStudent = await studentService.findStudentWithIdentifier({
-                    _id: req.params.id,
-                    userId
-                });
-                if (existingStudent && Array.isArray(existingStudent) && existingStudent.length > 0 && existingStudent[0].profileImage) {
-                    const oldImagePath = path_1.default.join(process.cwd(), existingStudent[0].profileImage);
-                    // profileImage is stored as '/uploads/filename', so path.join with cwd might need adjustment if cwd is project root and uploads is at root. 
-                    // Better to strip leading slash if present to avoid absolute path confusion, or just join carefully.
-                    // Assumes storage is in {ProjectRoot}/uploads based on addStudent logic (req.file.filename).
-                    try {
-                        if (fs_1.default.existsSync(oldImagePath)) {
-                            fs_1.default.unlinkSync(oldImagePath);
-                        }
-                    }
-                    catch (err) {
-                        console.error("Error deleting old image:", err);
-                        // Proceed even if delete fails
-                    }
-                }
-                req.body.profileImage = `/uploads/${req.file.filename}`;
-            }
-            // TODO: Verify ownership before update or ensure update filters by userId
-            const updatedUser = await studentService.updateStudent({
-                ...req.body,
+            const studentData = {
+                ...req.body, // Start with root fields (legacy support)
+                ...(studentBody || {}), // Override/Merge with structured 'student' object if present
                 _id: req.params.id,
-                userId // Assuming updateStudent logic will us this
-            });
-            return res.status(201).json({
-                status: 201,
+                userId
+            };
+            // Remove keys that are definitely NOT student data
+            delete studentData.student;
+            delete studentData.guardian;
+            delete studentData.address;
+            delete studentData.addresse;
+            delete studentData.madrasa;
+            delete studentData.oldMadrasaInfo;
+            delete studentData.fees;
+            // Handle profile image if uploaded
+            if (req.file) {
+                studentData.profileImage = `/uploads/${req.file.filename}`;
+            }
+            else if (req.body.profileImage) {
+                studentData.profileImage = req.body.profileImage;
+            }
+            const updatedStudent = await studentService.updateStudent(studentData, session);
+            // 2. Fetch existing related docs to get their IDs
+            const existingData = await studentService.findStudentWithIdentifier({ _id: req.params.id, userId });
+            if (!existingData || existingData.length === 0) {
+                throw new Error("Student not found or access denied");
+            }
+            const student = existingData[0];
+            // Helper to handle Array or Object
+            const getData = (data) => {
+                if (Array.isArray(data))
+                    return data[0];
+                return data;
+            };
+            // 3. Update Guardian
+            if (req.body.guardian) {
+                const guardianId = student.guardian?.[0]?._id;
+                const guardianBody = getData(req.body.guardian);
+                if (guardianId && guardianBody) {
+                    await guardianService.updateGuardian({ ...guardianBody, _id: guardianId }, session);
+                }
+                else if (!guardianId && guardianBody) {
+                    // If guardian doesn't exist but data provided, create it?
+                    // For now adhering to update logic.
+                }
+            }
+            // 4. Update Address (support both 'address' and 'addresse')
+            const addressPayload = req.body.address || req.body.addresse;
+            if (addressPayload) {
+                const addressId = student.addresse?.[0]?._id;
+                const addressBody = getData(addressPayload);
+                if (addressId && addressBody) {
+                    await addressService.updateAddress({ ...addressBody, _id: addressId }, session);
+                }
+            }
+            // 5. Update Previous Madrasa Info (support both 'madrasa' and 'oldMadrasaInfo')
+            const madrasaPayload = req.body.madrasa || req.body.oldMadrasaInfo;
+            if (madrasaPayload) {
+                const madrasaId = student.oldMadrasaInfo?.[0]?._id;
+                const madrasaBody = getData(madrasaPayload);
+                if (madrasaId && madrasaBody) {
+                    await madrasaService.updateMadrasaInfo({ ...madrasaBody, _id: madrasaId }, session);
+                }
+            }
+            // 6. Update Fees (if included)
+            if (req.body.fees) {
+                const feesId = student.fees?.[0]?._id;
+                const feesBody = getData(req.body.fees);
+                if (feesId && feesBody) {
+                    await feesService.updateFees({ ...feesBody, _id: feesId });
+                }
+            }
+            await session.commitTransaction();
+            // Return updated data
+            const finalData = await studentService.findStudentWithIdentifier({ _id: req.params.id });
+            return res.status(200).json({
+                status: 200, // Changed from 201 to 200 for update
                 success: true,
-                messages: "student data updated",
-                data: updatedUser,
+                messages: "student data updated", // simplified message to match user expectation
+                data: finalData[0],
             });
         }
         catch (error) {
+            await session.abortTransaction();
             next(error);
+        }
+        finally {
+            session.endSession();
         }
     }
     async filterAllStudents(req, res, next) {
@@ -152,6 +214,150 @@ class StudentController {
                 message: "all student data",
                 success: true,
                 data: results,
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async saveDraft(req, res, next) {
+        const session = await mongoose_1.default.startSession();
+        try {
+            const userId = req.user.id;
+            session.startTransaction();
+            req.body.profileImage = req.file ? `/uploads/${req.file.filename}` : null;
+            // Handle legacy payload (root fields) vs nested 'student' field
+            let studentBody = req.body.student || {};
+            // If student is array, take first (safeguard)
+            if (Array.isArray(studentBody))
+                studentBody = studentBody[0];
+            // Construct the unified draft payload
+            const draftData = {
+                ...req.body, // Spread root properties (legacy/mix)
+                ...studentBody, // Spread structured student props (overrides root)
+                // Explicitly map/ensure the nested arrays are taken from body
+                // and assigned to the schema fields we just added.
+                guardian: req.body.guardian,
+                addresse: req.body.addresse || req.body.address, // Handle both
+                fees: req.body.fees,
+                oldMadrasaInfo: req.body.oldMadrasaInfo || req.body.madrasa, // Handle both
+                status: 'draft',
+                profileImage: req.body.profileImage,
+                userId // Add userId to draft data
+            };
+            // Cleanup: Remove the 'student' key if it exists in root to avoid duplication/bloat
+            delete draftData.student;
+            delete draftData.address;
+            delete draftData.madrasa;
+            const student = await studentService.addStudent(draftData, session);
+            await session.commitTransaction();
+            return res.status(201).json({
+                status: 201, // Created
+                success: true,
+                messages: "Draft saved successfully",
+                data: student,
+            });
+        }
+        catch (error) {
+            await session.abortTransaction();
+            next(error);
+        }
+        finally {
+            session.endSession();
+        }
+    }
+    async getDrafts(req, res, next) {
+        try {
+            const userId = req.user.id;
+            // Use aggregation to get populated details filtered by userId
+            const results = await studentService.findDrafts(userId);
+            return res.status(200).json({
+                status: 200,
+                message: "draft students",
+                success: true,
+                data: results,
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async getDraftById(req, res, next) {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            // Fetch specifically by ID. 
+            // Since drafts have embedded fields, verify we get those.
+            // BaseService has findById or findStudentWithIdentifier.
+            // findStudentWithIdentifier uses aggregate and populates 'guardian' etc. from SEPARATE collections.
+            // BUT for drafts, data is EMBEDDED. 
+            // Use findById (lean) which should return the raw document with embedded fields.
+            const student = await studentService.findStudentId(id);
+            if (!student) {
+                return res.status(404).json({
+                    status: 404,
+                    success: false,
+                    message: "Draft not found"
+                });
+            }
+            // Verify userId matches (user-based data isolation)
+            if (student.userId !== userId) {
+                return res.status(403).json({
+                    status: 403,
+                    success: false,
+                    message: "Access denied"
+                });
+            }
+            // Optional: Verify status is draft? 
+            // If user wants to "edit" a draft, they need the data regardless.
+            if (student.status !== 'draft') {
+                // Maybe warn or redirect? 
+                // For now, return it but maybe checking status is good practice.
+            }
+            return res.status(200).json({
+                status: 200,
+                message: "draft student details",
+                success: true,
+                data: student,
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async deleteDraft(req, res, next) {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            // First verify the draft belongs to the user
+            const student = await studentService.findStudentId(id);
+            if (!student) {
+                return res.status(404).json({
+                    status: 404,
+                    success: false,
+                    message: "Draft not found",
+                });
+            }
+            // Verify userId matches
+            if (student.userId !== userId) {
+                return res.status(403).json({
+                    status: 403,
+                    success: false,
+                    message: "Access denied",
+                });
+            }
+            const result = await studentService.deleteStudent(id);
+            if (!result) {
+                return res.status(404).json({
+                    status: 404,
+                    success: false,
+                    message: "Draft not found or already deleted",
+                });
+            }
+            return res.status(200).json({
+                status: 200,
+                success: true,
+                message: "Draft deleted successfully",
             });
         }
         catch (error) {

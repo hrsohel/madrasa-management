@@ -12,12 +12,11 @@ const login = async (email: string, password: string) => {
   }
 
   const isPasswordMatch = await bcrypt.compare(password, user.password as string);
-  console.log(user.password, password, isPasswordMatch)
   if (!isPasswordMatch) {
     throw new Error("Invalid credentials");
   }
 
-  const token = jwt.sign({ id: user._id, role: user.role }, "your-secret-key", {
+  const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, process.env.TOKEN_SECRET as string, {
     expiresIn: "1d",
   });
 

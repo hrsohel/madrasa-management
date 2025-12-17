@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, ClientSession } from "mongoose";
 import Student, { IStudent } from "../models/Student.model";
 import { BaseRepository } from "./BaseRepository";
 
@@ -7,20 +7,27 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
         super(Student)
     }
     async findStudentsWithPolulated(identifier: any) {
+        console.log('Repository identifier:', identifier);
+
+        // Build the match query
+        const matchQuery: any = {
+            userId: identifier.userId // Keep as string, not ObjectId
+        };
+
+        // Add _id, roll, or uid to match
+        if (identifier._id) {
+            matchQuery._id = new Types.ObjectId(identifier._id as string);
+        } else if (identifier.roll) {
+            matchQuery.roll = identifier.roll;
+        } else if (identifier.uid) {
+            matchQuery.uid = identifier.uid;
+        }
+
+        console.log('Match query:', matchQuery);
+
         return await this.model.aggregate([
             {
-                $match: {
-                    $and: [
-                        { userId: new Types.ObjectId(identifier.userId as string) },
-                        {
-                            $or: [
-                                { _id: identifier._id ? new Types.ObjectId(identifier._id as string) : undefined },
-                                { roll: identifier.roll },
-                                { uid: identifier.uid }
-                            ].filter(condition => Object.values(condition)[0] !== undefined)
-                        }
-                    ]
-                }
+                $match: matchQuery
             },
             {
                 $lookup: {
@@ -57,7 +64,54 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
         ])
     }
 
-    async updateStudent(bodyData: any) {
-        return await Student.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true })
+    async updateStudent(bodyData: any, session?: ClientSession) {
+        return await Student.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true, session })
+    }
+
+    async findDraftsWithDetails(userId: string) {
+        return await this.model.aggregate([
+            {
+                $match: {
+                    status: 'draft',
+                    userId: userId
+                }
+            },
+            {
+                $lookup: {
+                    from: "guardians",
+                    localField: "_id",
+                    foreignField: "student",
+                    as: "populatedGuardian"
+                }
+            },
+            {
+                $lookup: {
+                    from: "addresses",
+                    localField: "_id",
+                    foreignField: "student",
+                    as: "populatedAddresse"
+                }
+            },
+            {
+                $lookup: {
+                    from: "oldmadrasainfos",
+                    localField: "_id",
+                    foreignField: "student",
+                    as: "populatedOldMadrasaInfo"
+                }
+            },
+            {
+                $lookup: {
+                    from: "fees",
+                    localField: "_id",
+                    foreignField: "student",
+                    as: "populatedFees"
+                }
+            }
+        ]);
+    }
+
+    async deleteStudent(_id: string) {
+        return await this.model.findByIdAndDelete(_id);
     }
 }

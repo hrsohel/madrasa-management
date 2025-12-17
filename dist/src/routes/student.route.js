@@ -31,8 +31,13 @@ const oldMadrasaInfoController = new oldMadrasaInfo_controller_1.OldMadrasaInfoC
 const idController = new ID_controller_1.IDcontroller();
 router.use(auth_middleware_1.verifyToken);
 router.post("/students/add-student", upload_1.upload.single("profileImage"), studentController.addStudent.bind(studentController));
+router.post("/students/save-draft", upload_1.upload.single("profileImage"), studentController.saveDraft.bind(studentController));
+router.get("/students/get-drafts", studentController.getDrafts.bind(studentController));
+router.get("/students/get-draft/:id", studentController.getDraftById.bind(studentController));
+router.delete("/students/delete-draft/:id", studentController.deleteDraft.bind(studentController));
 router.get("/students/get_student_with_guardian_address/:id", studentController.getStudentWithPopulated.bind(studentController));
 router.put("/students/update-student/:id", upload_1.upload.single("profileImage"), studentController.updateStudent.bind(studentController));
+router.put("/students/update-full-details/:id", upload_1.upload.single("profileImage"), studentController.updateFullDetails.bind(studentController));
 router.put("/guardians/update-guardian/:id", guardianController.updateGuardian.bind(guardianController));
 router.put("/addresses/update-address/:id", addressController.updateAddress.bind(addressController));
 router.put("/fees/update-fees/:id", feesController.updateFees.bind(feesController));

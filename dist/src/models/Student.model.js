@@ -17,10 +17,10 @@ const StudentSchema = new mongoose_1.Schema({
     dob: {
         type: Date,
         // required: [true, 'Date of birth is required'],
-        validate: {
-            validator: (date) => date < new Date(),
-            message: 'Date of birth cannot be in the future',
-        },
+        // validate: {
+        //   validator: (date: Date) => date < new Date(),
+        //   message: 'Date of birth cannot be in the future',
+        // },
     },
     nid: {
         type: String,
@@ -109,14 +109,24 @@ const StudentSchema = new mongoose_1.Schema({
         default: null
     },
     userId: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "User",
+        type: String,
         required: true,
     },
+    status: {
+        type: String,
+        enum: ['active', 'draft', 'archived'],
+        default: 'active'
+    },
+    // Embedded fields for drafts
+    guardian: { type: [mongoose_1.Schema.Types.Mixed], default: [] },
+    addresse: { type: [mongoose_1.Schema.Types.Mixed], default: [] },
+    fees: { type: mongoose_1.Schema.Types.Mixed, default: {} },
+    oldMadrasaInfo: { type: [mongoose_1.Schema.Types.Mixed], default: [] }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    strict: false // Allow saving fields not defined in schema (for drafts)
 });
 StudentSchema.index({ class: 1, section: 1, session: 1 });
 StudentSchema.index({ uid: 1 });

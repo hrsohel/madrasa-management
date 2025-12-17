@@ -7,8 +7,8 @@ class MadrasaService {
     async addMadrasaInfo(bodyData, session) {
         return await oldMadrasaRepository.createDocs(bodyData, session);
     }
-    async updateMadrasaInfo(bodyData) {
-        return await oldMadrasaRepository.updateOldMadrasaInfo(bodyData);
+    async updateMadrasaInfo(bodyData, session) {
+        return await oldMadrasaRepository.updateOldMadrasaInfo(bodyData, session);
     }
 }
 exports.MadrasaService = MadrasaService;

@@ -10,7 +10,7 @@ class FeesRepository extends BaseRepository_1.BaseRepository {
     constructor() {
         super(Fees_model_1.default);
     }
-    async updateFees(bodyData) {
+    async updateFees(bodyData, session) {
         return await Fees_model_1.default.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true });
     }
 }

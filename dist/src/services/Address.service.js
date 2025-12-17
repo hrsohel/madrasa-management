@@ -10,8 +10,8 @@ class AddressService {
     async findOneGuardian(any) {
         return await addressRepo.findOne(any);
     }
-    async updateAddress(bodyData) {
-        return await addressRepo.updateAddress(bodyData);
+    async updateAddress(bodyData, session) {
+        return await addressRepo.updateAddress(bodyData, session);
     }
 }
 exports.AddressService = AddressService;

@@ -10,8 +10,8 @@ class GuardianService {
     async findOneGuardian(any) {
         return await guardianService.findOne(any);
     }
-    async updateGuardian(bodyData) {
-        return await guardianService.updateGuardian(bodyData);
+    async updateGuardian(bodyData, session) {
+        return await guardianService.updateGuardian(bodyData, session);
     }
 }
 exports.GuardianService = GuardianService;

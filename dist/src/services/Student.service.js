@@ -19,8 +19,14 @@ class StudentService {
     async findStudentWithIdentifier(identifier) {
         return await studentRepo.findStudentsWithPolulated(identifier);
     }
-    async updateStudent(bodyData) {
-        return studentRepo.updateStudent(bodyData);
+    async updateStudent(bodyData, session) {
+        return studentRepo.updateStudent(bodyData, session);
+    }
+    async findDrafts(userId) {
+        return await studentRepo.findDraftsWithDetails(userId);
+    }
+    async deleteStudent(id) {
+        return await studentRepo.deleteStudent(id);
     }
 }
 exports.StudentService = StudentService;
