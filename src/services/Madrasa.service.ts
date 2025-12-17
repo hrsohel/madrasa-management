@@ -8,7 +8,7 @@ export class MadrasaService {
     async addMadrasaInfo(bodyData: Partial<IOldMadrasaInfo>, session?: ClientSession) {
         return await oldMadrasaRepository.createDocs(bodyData, session)
     }
-    async updateMadrasaInfo(bodyData: any) {
-        return await oldMadrasaRepository.updateOldMadrasaInfo(bodyData)
+    async updateMadrasaInfo(bodyData: any, session?: ClientSession) {
+        return await oldMadrasaRepository.updateOldMadrasaInfo(bodyData, session)
     }
 }
