@@ -16,6 +16,10 @@ const OldMadrasaInfoSchema = new mongoose_1.Schema({
         minlength: [3, 'Madrasa name too short'],
         maxlength: [100, 'Madrasa name too long'],
     },
+    oldMadrasaDivision: {
+        type: String,
+        // required: [true, 'Previous division is required']
+    },
     oldMadrasaClass: {
         type: String,
         // required: [true, 'Previous class is required']

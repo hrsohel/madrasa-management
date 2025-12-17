@@ -6,9 +6,11 @@ const guardianService = new GuardianService();
 export class GuardianController {
   async updateGuardian(req: Request, res: Response, next: NextFunction) {
     try {
+      const userId = (req.user as any).id;
       const updatedGuardian = await guardianService.updateGuardian({
         ...req.body,
         _id: req.params.id,
+        userId,
       });
       return res.status(200).json({
         status: 200,

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 // Interface for the document
 export interface IMadrasa extends Document {
@@ -29,8 +29,10 @@ export interface IMadrasa extends Document {
   };
 
   // Timestamps
+  // Timestamps
   createdAt: Date;
   updatedAt: Date;
+  userId: Types.ObjectId;
 }
 
 // Mongoose Schema
@@ -79,6 +81,11 @@ const MadrasaSchema = new Schema<IMadrasa>(
     fees: {
       type: Schema.Types.Mixed,
       default: {}
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   {

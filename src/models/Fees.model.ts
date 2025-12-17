@@ -14,6 +14,8 @@ export interface IFees extends Document {
 
   helpType: string;     // e.g., "Orphan", "Scholarship", "Staff Child", "Poor Fund"
   helpAmount: number;   // Amount waived or discounted (as string if you want to store "Full" / "50%" etc.)
+  trxID?: string;
+  userId: Schema.Types.ObjectId;
 }
 
 const FeesSchema = new Schema<IFees>(
@@ -71,6 +73,15 @@ const FeesSchema = new Schema<IFees>(
       type: String,
       // required: true,
       default: 'None',
+    },
+    trxID: {
+      type: String,
+      required: false,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User', // Assuming there's a 'User' model
+      required: true,
     },
     helpAmount: {
       type: Number,

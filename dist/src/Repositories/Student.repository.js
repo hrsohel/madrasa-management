@@ -15,10 +15,15 @@ class StudentRepostitory extends BaseRepository_1.BaseRepository {
         return await this.model.aggregate([
             {
                 $match: {
-                    $or: [
-                        { _id: new mongoose_1.Types.ObjectId(identifier._id) },
-                        { roll: identifier.roll },
-                        { uid: identifier.uid }
+                    $and: [
+                        { userId: new mongoose_1.Types.ObjectId(identifier.userId) },
+                        {
+                            $or: [
+                                { _id: identifier._id ? new mongoose_1.Types.ObjectId(identifier._id) : undefined },
+                                { roll: identifier.roll },
+                                { uid: identifier.uid }
+                            ].filter(condition => Object.values(condition)[0] !== undefined)
+                        }
                     ]
                 }
             },

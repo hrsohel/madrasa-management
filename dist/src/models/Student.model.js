@@ -107,7 +107,12 @@ const StudentSchema = new mongoose_1.Schema({
     profileImage: {
         type: String,
         default: null
-    }
+    },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

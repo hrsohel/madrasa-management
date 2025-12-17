@@ -1,11 +1,12 @@
 // src/models/FeeHead.ts
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IFeeHead extends Document {
   name: string;
   nameEn: string;
   amount: number;
   isActive: boolean;
+  userId: Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -31,6 +32,11 @@ const feeHeadSchema = new Schema<IFeeHead>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   {

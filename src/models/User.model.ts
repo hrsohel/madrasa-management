@@ -44,12 +44,11 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-// userSchema.pre("save", (async function () {
-//   if (this.isModified("password")) {
-//     this.password = await bcrypt.hash(this.password, 10);
-//   }
-//   // next();
-// }) as PreSaveMiddlewareFunction<IUser>);
+userSchema.pre("save", (async function () {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+}) as PreSaveMiddlewareFunction<IUser>);
 
 const User = model<IUser>("User", userSchema);
 

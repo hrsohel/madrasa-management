@@ -1,4 +1,4 @@
-import { Document, model, Schema } from "mongoose";
+import { Document, model, Schema, Types } from "mongoose";
 
 export interface IIncome extends Document {
     roshidNo: string
@@ -6,15 +6,17 @@ export interface IIncome extends Document {
     amount: number
     sectorName: string
     method: string
-    receiptIssuer: string
+    receiptBookNumber: number;
+    receiptIssuer: string;
+    userId: Types.ObjectId;
     additionalNotes: string
 }
 
 const IncomeSchema = new Schema<IIncome>({
     roshidNo: {
         type: String,
-        default: null,
-        // unique: true
+        default: () => `R-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        unique: true
     },
     donorName: {
         type: String,
@@ -40,8 +42,13 @@ const IncomeSchema = new Schema<IIncome>({
     additionalNotes: {
         type: String,
         default: null
-    }
-}, {timestamps: true})
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+}, { timestamps: true })
 
 const Income = model<IIncome>("Income", IncomeSchema)
 

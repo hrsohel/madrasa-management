@@ -6,7 +6,8 @@ const donorService = new DonorService()
 export class DonorContoller {
     async addDonor(req: Request, res: Response, next: NextFunction) {
         try {
-            await donorService.addDonor(req.body)
+            const userId = (req.user as any).id;
+            await donorService.addDonor({ ...req.body, userId })
             return res.status(201).json({
                 status: 201,
                 success: true,
@@ -20,7 +21,8 @@ export class DonorContoller {
 
     async getDonors(req: Request, res: Response, next: NextFunction) {
         try {
-            const donors = await donorService.getFilteredDonor(req.query)
+            const userId = (req.user as any).id;
+            const donors = await donorService.getFilteredDonor({ ...req.query, userId })
             return res.status(200).json({
                 status: 200,
                 success: true,

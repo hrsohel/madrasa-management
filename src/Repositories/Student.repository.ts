@@ -10,10 +10,15 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
         return await this.model.aggregate([
             {
                 $match: {
-                    $or: [
-                        { _id: new Types.ObjectId(identifier._id as string) },
-                        { roll: identifier.roll },
-                        { uid: identifier.uid }
+                    $and: [
+                        { userId: new Types.ObjectId(identifier.userId as string) },
+                        {
+                            $or: [
+                                { _id: identifier._id ? new Types.ObjectId(identifier._id as string) : undefined },
+                                { roll: identifier.roll },
+                                { uid: identifier.uid }
+                            ].filter(condition => Object.values(condition)[0] !== undefined)
+                        }
                     ]
                 }
             },
@@ -53,6 +58,6 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
     }
 
     async updateStudent(bodyData: any) {
-        return await Student.findOneAndUpdate({_id: bodyData._id}, {$set: bodyData}, {new: true})
+        return await Student.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true })
     }
 }

@@ -6,9 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinancialsService = void 0;
 const Income_model_1 = __importDefault(require("../models/Income.model"));
 const Expense_model_1 = __importDefault(require("../models/Expense.model"));
+const mongoose_1 = require("mongoose");
 class FinancialsService {
-    async getMonthlySummary() {
+    async getMonthlySummary(userId) {
         const incomePipeline = [
+            {
+                $match: { userId: new mongoose_1.Types.ObjectId(userId) }
+            },
             {
                 $group: {
                     _id: {
@@ -20,6 +24,9 @@ class FinancialsService {
             },
         ];
         const expensePipeline = [
+            {
+                $match: { userId: new mongoose_1.Types.ObjectId(userId) }
+            },
             {
                 $group: {
                     _id: {
@@ -53,8 +60,8 @@ class FinancialsService {
         });
         return summary;
     }
-    async getFinancialAnalytics() {
-        const monthlySummary = await this.getMonthlySummary();
+    async getFinancialAnalytics(userId) {
+        const monthlySummary = await this.getMonthlySummary(userId);
         const currentYear = new Date().getFullYear();
         const previousYear = currentYear - 1;
         const currentYearData = monthlySummary.filter(item => item.year === currentYear);

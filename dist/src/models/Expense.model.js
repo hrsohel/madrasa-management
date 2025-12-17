@@ -4,7 +4,8 @@ const mongoose_1 = require("mongoose");
 const ExpenseSchema = new mongoose_1.Schema({
     roshidNo: {
         type: String,
-        default: null
+        default: () => `E-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        unique: true
     },
     donorName: {
         type: String,
@@ -30,7 +31,12 @@ const ExpenseSchema = new mongoose_1.Schema({
     additionalNotes: {
         type: String,
         default: null
-    }
+    },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
 }, { timestamps: true });
 const Expense = (0, mongoose_1.model)("Expense", ExpenseSchema);
 exports.default = Expense;

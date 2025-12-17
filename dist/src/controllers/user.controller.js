@@ -72,9 +72,54 @@ const getAllUsers = async (req, res) => {
         });
     }
 };
+const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await User_service_1.UserService.deleteUser(id);
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully",
+            data: result,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "User deletion failed",
+            error: error.message,
+        });
+    }
+};
+const changePassword = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Old and new passwords are required",
+            });
+        }
+        const result = await User_service_1.UserService.changePassword(userId, oldPassword, newPassword);
+        res.status(200).json({
+            success: true,
+            message: "Password changed successfully",
+            data: result,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Password change failed",
+            error: error.message,
+        });
+    }
+};
 exports.UserController = {
     login,
     logout,
     signUp,
     getAllUsers,
+    deleteUser,
+    changePassword,
 };

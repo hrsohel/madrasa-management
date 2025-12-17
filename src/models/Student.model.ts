@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 const GENDER = ['Male', 'Female'] as const;
 const BLOOD_GROUP = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const;
 const SHIFT = ['Morning', 'Day', 'Evening'] as const;
@@ -23,7 +23,8 @@ export interface IStudent extends Document {
   session: string;
   createdAt?: Date;
   updatedAt?: Date;
-  profileImage: string
+  profileImage: string;
+  userId: Types.ObjectId;
 }
 
 const StudentSchema = new Schema<IStudent>(
@@ -142,7 +143,12 @@ const StudentSchema = new Schema<IStudent>(
     profileImage: {
       type: String,
       default: null
-    }
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,

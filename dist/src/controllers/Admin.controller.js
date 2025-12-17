@@ -4,7 +4,8 @@ exports.AdminController = void 0;
 const Admin_service_1 = require("../services/Admin.service");
 const getAdminPanelData = async (req, res) => {
     try {
-        const data = await Admin_service_1.AdminService.getAdminPanelData();
+        const userId = req.user.id;
+        const data = await Admin_service_1.AdminService.getAdminPanelData(userId);
         res.status(200).json({
             success: true,
             message: "Admin panel data fetched successfully",

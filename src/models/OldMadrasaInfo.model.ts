@@ -9,6 +9,7 @@ export interface IOldMadrasaInfo extends Document {
   oldMadrasaName: string;
   oldMadrasaClass: string;
   oldMadrasaResult: 'Passed' | 'Failed' | 'Appeared' | 'Transferred';
+  oldMadrasaDivision: string
 
   // Talimi (Religious) Guardian during previous study
   talimiGuardianName: string;
@@ -40,6 +41,11 @@ const OldMadrasaInfoSchema = new Schema<IOldMadrasaInfo>(
       trim: true,
       minlength: [3, 'Madrasa name too short'],
       maxlength: [100, 'Madrasa name too long'],
+    },
+
+    oldMadrasaDivision: {
+      type: String,
+      // required: [true, 'Previous division is required']
     },
 
     oldMadrasaClass: {

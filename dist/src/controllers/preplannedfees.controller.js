@@ -5,7 +5,8 @@ const PrePlannedFees_model_1 = require("../models/PrePlannedFees.model");
 class PrePlannedFeesController {
     async getAllFees(req, res) {
         try {
-            const feeHeads = await PrePlannedFees_model_1.PrePlannedFees.find({})
+            const userId = req.user.id;
+            const feeHeads = await PrePlannedFees_model_1.PrePlannedFees.find({ userId })
                 .sort({ createdAt: 1 }) // or { name: 1 } for alphabetical
                 .lean(); // optional: returns plain JS objects (faster)
             res.status(200).json({

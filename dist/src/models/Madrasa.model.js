@@ -44,6 +44,11 @@ const MadrasaSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.Mixed,
         default: {}
     },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
 }, {
     timestamps: true, // automatically adds createdAt & updatedAt
 });

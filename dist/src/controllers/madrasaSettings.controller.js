@@ -5,7 +5,8 @@ const madrasaSettings_service_1 = require("../services/madrasaSettings.service")
 class MadrasaSettingsController {
     async get(req, res, next) {
         try {
-            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.get();
+            const userId = req.user.id;
+            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.get(userId);
             if (!madrasa) {
                 return res.status(404).json({ message: 'Madrasa not found' });
             }
@@ -17,8 +18,9 @@ class MadrasaSettingsController {
     }
     async create(req, res, next) {
         try {
+            const userId = req.user.id;
             const logoPath = req.file ? `/uploads/${req.file.filename}` : undefined;
-            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.create(req.body, logoPath);
+            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.create(req.body, logoPath, userId);
             res.status(201).json(madrasa);
         }
         catch (error) {
@@ -27,9 +29,10 @@ class MadrasaSettingsController {
     }
     async update(req, res, next) {
         try {
+            const userId = req.user.id;
             const logoPath = req.file ? `/uploads/${req.file.filename}` : undefined;
             console.log(logoPath);
-            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.update(req.body, logoPath);
+            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.update(req.body, logoPath, userId);
             if (!madrasa) {
                 return res.status(404).json({ message: 'Madrasa not found to update' });
             }
@@ -41,8 +44,9 @@ class MadrasaSettingsController {
     }
     async addFee(req, res, next) {
         try {
+            const userId = req.user.id;
             const { feeName, amount } = req.body;
-            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.addFee(feeName, amount);
+            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.addFee(feeName, amount, userId);
             res.status(200).json(madrasa);
         }
         catch (error) {
@@ -51,8 +55,9 @@ class MadrasaSettingsController {
     }
     async removeFee(req, res, next) {
         try {
+            const userId = req.user.id;
             const { feeName } = req.params;
-            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.removeFee(feeName);
+            const madrasa = await madrasaSettings_service_1.madrasaSettingsService.removeFee(feeName, userId);
             res.status(200).json(madrasa);
         }
         catch (error) {

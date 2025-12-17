@@ -5,7 +5,8 @@ import { IFeeHead, PrePlannedFees } from '../models/PrePlannedFees.model';
 export class PrePlannedFeesController {
     async getAllFees(req: Request, res: Response) {
         try {
-            const feeHeads: IFeeHead[] = await PrePlannedFees.find({})
+            const userId = (req.user as any).id;
+            const feeHeads: IFeeHead[] = await PrePlannedFees.find({ userId })
                 .sort({ createdAt: 1 }) // or { name: 1 } for alphabetical
                 .lean(); // optional: returns plain JS objects (faster)
 

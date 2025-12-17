@@ -24,6 +24,11 @@ const feeHeadSchema = new mongoose_1.Schema({
         type: Boolean,
         default: true,
     },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
 }, {
     timestamps: true,
 });

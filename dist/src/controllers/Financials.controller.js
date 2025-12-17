@@ -6,7 +6,8 @@ const financialsService = new Financials_service_1.FinancialsService();
 class FinancialsController {
     async getFinancialSummary(req, res, next) {
         try {
-            const summary = await financialsService.getFinancialAnalytics();
+            const userId = req.user.id;
+            const summary = await financialsService.getFinancialAnalytics(userId);
             return res.status(200).json({
                 status: 200,
                 success: true,

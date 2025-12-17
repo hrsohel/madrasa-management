@@ -4,7 +4,8 @@ import { madrasaSettingsService } from '../services/madrasaSettings.service';
 class MadrasaSettingsController {
   async get(req: Request, res: Response, next: NextFunction) {
     try {
-      const madrasa = await madrasaSettingsService.get();
+      const userId = (req.user as any).id;
+      const madrasa = await madrasaSettingsService.get(userId);
       if (!madrasa) {
         return res.status(404).json({ message: 'Madrasa not found' });
       }
@@ -16,8 +17,9 @@ class MadrasaSettingsController {
 
   async create(req: Request, res: Response, next: NextFunction) {
     try {
+      const userId = (req.user as any).id;
       const logoPath = (req as any).file ? `/uploads/${(req as any).file.filename}` : undefined;
-      const madrasa = await madrasaSettingsService.create(req.body, logoPath);
+      const madrasa = await madrasaSettingsService.create(req.body, logoPath, userId);
       res.status(201).json(madrasa);
     } catch (error) {
       next(error);
@@ -26,9 +28,10 @@ class MadrasaSettingsController {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
+      const userId = (req.user as any).id;
       const logoPath = (req as any).file ? `/uploads/${(req as any).file.filename}` : undefined;
       console.log(logoPath)
-      const madrasa = await madrasaSettingsService.update(req.body, logoPath);
+      const madrasa = await madrasaSettingsService.update(req.body, logoPath, userId);
       if (!madrasa) {
         return res.status(404).json({ message: 'Madrasa not found to update' });
       }
@@ -40,8 +43,9 @@ class MadrasaSettingsController {
 
   async addFee(req: Request, res: Response, next: NextFunction) {
     try {
+      const userId = (req.user as any).id;
       const { feeName, amount } = req.body;
-      const madrasa = await madrasaSettingsService.addFee(feeName, amount);
+      const madrasa = await madrasaSettingsService.addFee(feeName, amount, userId);
       res.status(200).json(madrasa);
     } catch (error) {
       next(error);
@@ -50,8 +54,9 @@ class MadrasaSettingsController {
 
   async removeFee(req: Request, res: Response, next: NextFunction) {
     try {
+      const userId = (req.user as any).id;
       const { feeName } = req.params;
-      const madrasa = await madrasaSettingsService.removeFee(feeName);
+      const madrasa = await madrasaSettingsService.removeFee(feeName, userId);
       res.status(200).json(madrasa);
     } catch (error) {
       next(error);

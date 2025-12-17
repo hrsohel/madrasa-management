@@ -6,7 +6,8 @@ const donorService = new Donor_service_1.DonorService();
 class DonorContoller {
     async addDonor(req, res, next) {
         try {
-            await donorService.addDonor(req.body);
+            const userId = req.user.id;
+            await donorService.addDonor({ ...req.body, userId });
             return res.status(201).json({
                 status: 201,
                 success: true,
@@ -20,7 +21,8 @@ class DonorContoller {
     }
     async getDonors(req, res, next) {
         try {
-            const donors = await donorService.getFilteredDonor(req.query);
+            const userId = req.user.id;
+            const donors = await donorService.getFilteredDonor({ ...req.query, userId });
             return res.status(200).json({
                 status: 200,
                 success: true,

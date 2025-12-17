@@ -1,8 +1,11 @@
 import express from "express";
 import { PrePlannedFeesController } from "../controllers/preplannedfees.controller";
-const prePlannedControlller =new PrePlannedFeesController()
+import { verifyToken } from "../middlewares/auth.middleware";
+const prePlannedControlller = new PrePlannedFeesController()
 
 const router = express.Router();
+
+router.use(verifyToken);
 
 router.get("/", prePlannedControlller.getAllFees);
 

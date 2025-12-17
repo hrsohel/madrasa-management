@@ -3,7 +3,8 @@ import { AdminService } from "../services/Admin.service";
 
 const getAdminPanelData = async (req: Request, res: Response) => {
   try {
-    const data = await AdminService.getAdminPanelData();
+    const userId = (req.user as any).id;
+    const data = await AdminService.getAdminPanelData(userId);
     res.status(200).json({
       success: true,
       message: "Admin panel data fetched successfully",
@@ -20,7 +21,7 @@ const getAdminPanelData = async (req: Request, res: Response) => {
 
 const createNewInstitution = async (req: Request, res: Response) => {
   try {
-    
+
     const { email, password, fullName, totalStudents } = req.body;
     const result = await AdminService.createNewInstitution(
       email,

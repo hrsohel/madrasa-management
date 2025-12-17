@@ -6,8 +6,8 @@ export interface IID extends Document {
 }
 
 const IDSchema = new Schema<IID>({
-    id: {type: String},
-    seq: {type: Number}
+    id: { type: String },
+    seq: { type: Number }
 })
 
 const ID = model<IID>("ID", IDSchema)

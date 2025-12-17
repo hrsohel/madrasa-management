@@ -49,6 +49,15 @@ const FeesSchema = new mongoose_1.Schema({
         // required: true,
         default: 'None',
     },
+    trxID: {
+        type: String,
+        required: false,
+    },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'User', // Assuming there's a 'User' model
+        required: true,
+    },
     helpAmount: {
         type: Number,
         // required: true,

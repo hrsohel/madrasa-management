@@ -6,6 +6,7 @@ const incomeService = new IncomeService()
 export class Incomecontroller {
     async addIncome(req: Request, res: Response, next: NextFunction) {
         try {
+            const userId = (req.user as any).id;
             const existIncome = await incomeService.getSingleIncome(req.body.roshidNo)
             if (existIncome.length > 0) {
                 return res.status(403).json({
@@ -15,7 +16,7 @@ export class Incomecontroller {
                     data: []
                 })
             }
-            await incomeService.addIncome(req.body)
+            await incomeService.addIncome({ ...req.body, userId })
             return res.status(201).json({
                 status: 201,
                 success: true,
@@ -29,9 +30,10 @@ export class Incomecontroller {
 
     async getIncomes(req: Request, res: Response, next: NextFunction) {
         try {
+            const userId = (req.user as any).id;
             const [incomes, totalDocuments] = await Promise.all([
-                incomeService.getIncomeWithFilters(req.query),
-                incomeService.totalIncomes(req.query)
+                incomeService.getIncomeWithFilters({ ...req.query, userId }),
+                incomeService.totalIncomes({ ...req.query, userId })
             ])
             return res.status(200).json({
                 status: 200,

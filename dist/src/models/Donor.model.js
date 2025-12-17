@@ -18,7 +18,12 @@ const DonorSchema = new mongoose_1.Schema({
     address: {
         type: String,
         default: null
-    }
+    },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
 });
 const Donor = (0, mongoose_1.model)("Donor", DonorSchema);
 exports.default = Donor;

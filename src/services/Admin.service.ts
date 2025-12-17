@@ -5,9 +5,9 @@ import { UserRole } from "../constants/user.constants";
 import { sendEmail } from "../utils/sendEmail";
 import bcrypt from "bcrypt";
 
-const getAdminPanelData = async () => {
-  const madrasa = await Madrasa.findOne();
-  const totalStudents = await Student.countDocuments();
+const getAdminPanelData = async (userId: string) => {
+  const madrasa = await Madrasa.findOne({ userId });
+  const totalStudents = await Student.countDocuments({ userId });
 
   if (!madrasa) {
     throw new Error("Madrasa not found");

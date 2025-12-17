@@ -6,9 +6,11 @@ const addressService = new Address_service_1.AddressService();
 class AddressController {
     async updateAddress(req, res, next) {
         try {
+            const userId = req.user.id;
             const updatedAddress = await addressService.updateAddress({
                 ...req.body,
                 _id: req.params.id,
+                userId,
             });
             return res.status(200).json({
                 status: 200,

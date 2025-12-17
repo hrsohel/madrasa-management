@@ -6,9 +6,11 @@ const feesService = new Fees_service_1.FeesService();
 class FeesController {
     async updateFees(req, res, next) {
         try {
+            const userId = req.user.id;
             const updatedFees = await feesService.updateFees({
                 ...req.body,
                 _id: req.params.id,
+                userId
             });
             return res.status(200).json({
                 status: 200,

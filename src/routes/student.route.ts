@@ -11,6 +11,7 @@ import { OldMadrasaInfoController } from "../controllers/oldMadrasaInfo.controll
 import { madrasaSettingsController } from "../controllers/madrasaSettings.controller";
 import { upload } from "../middlewares/upload";
 import { IDcontroller } from "../controllers/ID.controller";
+import { verifyToken } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
@@ -25,6 +26,8 @@ const feesController = new FeesController();
 const oldMadrasaInfoController = new OldMadrasaInfoController();
 const idController = new IDcontroller()
 
+router.use(verifyToken);
+
 router.post(
   "/students/add-student",
   upload.single("profileImage"),
@@ -36,6 +39,7 @@ router.get(
 );
 router.put(
   "/students/update-student/:id",
+  upload.single("profileImage"),
   studentController.updateStudent.bind(studentController)
 );
 router.put(
@@ -50,6 +54,10 @@ router.put("/fees/update-fees/:id", feesController.updateFees.bind(feesControlle
 router.put(
   "/old-madrasa-info/update-old-madrasa-info/:id",
   oldMadrasaInfoController.updateOldMadrasaInfo.bind(oldMadrasaInfoController)
+);
+router.post(
+  "/old-madrasa-info/add-old-madrasa-info",
+  oldMadrasaInfoController.addOldMadrasaInfo.bind(oldMadrasaInfoController)
 );
 router.get(
   "/students/get-all-students",

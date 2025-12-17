@@ -8,24 +8,10 @@ const user_route_1 = require("./user.route");
 const student_route_1 = require("./student.route");
 const Admin_route_1 = require("./Admin.route");
 const prePlannedFees_route_1 = require("./prePlannedFees.route");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
 const router = express_1.default.Router();
-const moduleRoutes = [
-    {
-        path: "/users",
-        route: user_route_1.UserRoutes,
-    },
-    {
-        path: "/students",
-        route: student_route_1.StudentRoutes,
-    },
-    {
-        path: "/admin",
-        route: Admin_route_1.AdminRoutes,
-    },
-    {
-        path: "/fees",
-        route: prePlannedFees_route_1.FeesRoute,
-    }
-];
-moduleRoutes.forEach((route) => router.use(route.path, route.route));
+router.use("/users", user_route_1.UserRoutes);
+router.use("/students", auth_middleware_1.verifyToken, student_route_1.StudentRoutes);
+router.use("/admin", auth_middleware_1.verifyToken, Admin_route_1.AdminRoutes);
+router.use("/fees", auth_middleware_1.verifyToken, prePlannedFees_route_1.FeesRoute);
 exports.default = router;

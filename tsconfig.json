@@ -1,26 +1,12 @@
 {
-
   "compilerOptions": {
-
     "target": "es2021",
-
     "module": "commonjs",
-
     "outDir": "./dist",
-
     "rootDir": "./",
-
     "strict": true,
-
     "esModuleInterop": true,
-
     "forceConsistentCasingInFileNames": true,
-
-    "skipLibCheck": true,
-
-    // "typeRoots": ["./node_modules/@types", "./types"]
-
+    "skipLibCheck": true
   }
-
 }
-

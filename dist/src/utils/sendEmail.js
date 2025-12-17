@@ -16,13 +16,14 @@ const transporter = nodemailer_1.default.createTransport({
         pass: process.env.EMAIL_PASSWORD,
     },
 });
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, text, html) => {
     try {
         await transporter.sendMail({
             from: process.env.EMAIL_USERNAME,
             to,
             subject,
             text,
+            html, // Add HTML support
         });
         console.log("Email sent successfully");
     }

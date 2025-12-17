@@ -5,9 +5,9 @@ export class IDcontroller {
     async updateID(req: Request, res: Response, next: NextFunction): Promise<any> {
         try {
             const data = await ID.findOneAndUpdate(
-                { _id: "693d83189a99227c00cebea4" },
+                { id: "HS" },
                 {
-                    $set: { id: "HS" },
+                    $set: { id: "HS" }, // Ensure userId is set on insert
                     $inc: { seq: 1 }
                 },
                 { new: true, upsert: true }

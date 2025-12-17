@@ -1,7 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 
 const DIVISIONS = [
-  'Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 
+  'Dhaka', 'Chittagong', 'Rajshahi', 'Khulna',
   'Barisal', 'Sylhet', 'Rangpur', 'Mymensingh'
 ] as const;
 

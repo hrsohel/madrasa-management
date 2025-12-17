@@ -10,9 +10,9 @@ const User_model_1 = __importDefault(require("../models/User.model"));
 const user_constants_1 = require("../constants/user.constants");
 const sendEmail_1 = require("../utils/sendEmail");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const getAdminPanelData = async () => {
-    const madrasa = await Madrasa_model_1.Madrasa.findOne();
-    const totalStudents = await Student_model_1.default.countDocuments();
+const getAdminPanelData = async (userId) => {
+    const madrasa = await Madrasa_model_1.Madrasa.findOne({ userId });
+    const totalStudents = await Student_model_1.default.countDocuments({ userId });
     if (!madrasa) {
         throw new Error("Madrasa not found");
     }

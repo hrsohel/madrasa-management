@@ -1,9 +1,13 @@
 import Income from "../models/Income.model";
 import Expense from "../models/Expense.model";
+import { Types } from "mongoose";
 
 export class FinancialsService {
-    async getMonthlySummary() {
+    async getMonthlySummary(userId: string) {
         const incomePipeline = [
+            {
+                $match: { userId: new Types.ObjectId(userId) }
+            },
             {
                 $group: {
                     _id: {
@@ -16,6 +20,9 @@ export class FinancialsService {
         ];
 
         const expensePipeline = [
+            {
+                $match: { userId: new Types.ObjectId(userId) }
+            },
             {
                 $group: {
                     _id: {
@@ -47,7 +54,7 @@ export class FinancialsService {
             }
             summaryMap.get(key)!.totalExpense = item.totalExpense;
         });
-        
+
         const summary = Array.from(summaryMap.values());
 
         summary.forEach(item => {
@@ -58,8 +65,8 @@ export class FinancialsService {
         return summary;
     }
 
-    async getFinancialAnalytics() {
-        const monthlySummary = await this.getMonthlySummary();
+    async getFinancialAnalytics(userId: string) {
+        const monthlySummary = await this.getMonthlySummary(userId);
         const currentYear = new Date().getFullYear();
         const previousYear = currentYear - 1;
 

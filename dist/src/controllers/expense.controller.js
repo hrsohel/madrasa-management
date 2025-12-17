@@ -6,6 +6,7 @@ const expenseService = new Expense_service_1.ExpenseService();
 class ExpenseController {
     async addeExpense(req, res, next) {
         try {
+            const userId = req.user.id;
             const existIncome = await expenseService.getSingleExpense(req.body.roshidNo);
             if (existIncome.length > 0) {
                 return res.status(403).json({
@@ -15,7 +16,7 @@ class ExpenseController {
                     data: []
                 });
             }
-            await expenseService.addExpense(req.body);
+            await expenseService.addExpense({ ...req.body, userId });
             return res.status(201).json({
                 status: 201,
                 success: true,
@@ -29,9 +30,10 @@ class ExpenseController {
     }
     async getExpenses(req, res, next) {
         try {
+            const userId = req.user.id;
             const [incomes, totalDocuments] = await Promise.all([
-                expenseService.getExpenseWithFilters(req.query),
-                expenseService.totalExpenses(req.query)
+                expenseService.getExpenseWithFilters({ ...req.query, userId }),
+                expenseService.totalExpenses({ ...req.query, userId })
             ]);
             return res.status(200).json({
                 status: 200,

@@ -4,8 +4,8 @@ const mongoose_1 = require("mongoose");
 const IncomeSchema = new mongoose_1.Schema({
     roshidNo: {
         type: String,
-        default: null,
-        // unique: true
+        default: () => `R-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        unique: true
     },
     donorName: {
         type: String,
@@ -31,7 +31,12 @@ const IncomeSchema = new mongoose_1.Schema({
     additionalNotes: {
         type: String,
         default: null
-    }
+    },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
 }, { timestamps: true });
 const Income = (0, mongoose_1.model)("Income", IncomeSchema);
 exports.default = Income;
