@@ -18,7 +18,13 @@ export class StudentService {
     async findStudentWithIdentifier(identifier: any) {
         return await studentRepo.findStudentsWithPolulated(identifier)
     }
-    async updateStudent(bodyData: any) {
-        return studentRepo.updateStudent(bodyData)
+    async updateStudent(bodyData: any, session?: ClientSession) {
+        return studentRepo.updateStudent(bodyData, session)
+    }
+    async findDrafts() {
+        return await studentRepo.findDraftsWithDetails();
+    }
+    async deleteStudent(id: string) {
+        return await studentRepo.deleteStudent(id);
     }
 }
