@@ -23,7 +23,12 @@ export interface IStudent extends Document {
   session: string;
   createdAt?: Date;
   updatedAt?: Date;
-  profileImage: string
+  profileImage: string;
+  status: 'active' | 'draft' | 'archived';
+  guardian?: any[];
+  addresse?: any[];
+  fees?: any;
+  oldMadrasaInfo?: any[];
 }
 
 const StudentSchema = new Schema<IStudent>(
@@ -39,10 +44,10 @@ const StudentSchema = new Schema<IStudent>(
     dob: {
       type: Date,
       // required: [true, 'Date of birth is required'],
-      validate: {
-        validator: (date: Date) => date < new Date(),
-        message: 'Date of birth cannot be in the future',
-      },
+      // validate: {
+      //   validator: (date: Date) => date < new Date(),
+      //   message: 'Date of birth cannot be in the future',
+      // },
     },
 
     nid: {
@@ -142,12 +147,23 @@ const StudentSchema = new Schema<IStudent>(
     profileImage: {
       type: String,
       default: null
-    }
+    },
+    status: {
+      type: String,
+      enum: ['active', 'draft', 'archived'],
+      default: 'active'
+    },
+    // Embedded fields for drafts
+    guardian: { type: [Schema.Types.Mixed], default: [] },
+    addresse: { type: [Schema.Types.Mixed], default: [] },
+    fees: { type: Schema.Types.Mixed, default: {} },
+    oldMadrasaInfo: { type: [Schema.Types.Mixed], default: [] }
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    strict: false // Allow saving fields not defined in schema (for drafts)
   }
 );
 
