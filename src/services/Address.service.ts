@@ -12,7 +12,7 @@ export class AddressService {
         return await addressRepo.findOne(any)
     }
 
-    async updateAddress(bodyData: any) {
-        return await addressRepo.updateAddress(bodyData)
+    async updateAddress(bodyData: any, session?: ClientSession) {
+        return await addressRepo.updateAddress(bodyData, session)
     }
 }

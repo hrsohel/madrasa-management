@@ -11,7 +11,7 @@ export class GuardianService {
         return await guardianService.findOne(any)
     }
 
-    async updateGuardian(bodyData: any) {
-        return await guardianService.updateGuardian(bodyData)
+    async updateGuardian(bodyData: any, session?: ClientSession) {
+        return await guardianService.updateGuardian(bodyData, session)
     }
 }
