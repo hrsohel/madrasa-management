@@ -55,6 +55,12 @@ router.delete(
   studentController.deleteDraft.bind(studentController)
 );
 
+router.put(
+  "/students/update-draft/:id",
+  upload.single("profileImage"),
+  studentController.updateDraft.bind(studentController)
+);
+
 router.get(
   "/students/get_student_with_guardian_address/:id",
   studentController.getStudentWithPopulated.bind(studentController)

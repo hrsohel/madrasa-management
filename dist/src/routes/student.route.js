@@ -35,6 +35,7 @@ router.post("/students/save-draft", upload_1.upload.single("profileImage"), stud
 router.get("/students/get-drafts", studentController.getDrafts.bind(studentController));
 router.get("/students/get-draft/:id", studentController.getDraftById.bind(studentController));
 router.delete("/students/delete-draft/:id", studentController.deleteDraft.bind(studentController));
+router.put("/students/update-draft/:id", upload_1.upload.single("profileImage"), studentController.updateDraft.bind(studentController));
 router.get("/students/get_student_with_guardian_address/:id", studentController.getStudentWithPopulated.bind(studentController));
 router.put("/students/update-student/:id", upload_1.upload.single("profileImage"), studentController.updateStudent.bind(studentController));
 router.put("/students/update-full-details/:id", upload_1.upload.single("profileImage"), studentController.updateFullDetails.bind(studentController));

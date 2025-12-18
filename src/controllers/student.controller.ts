@@ -71,11 +71,14 @@ export class StudentController {
 
       await session.commitTransaction()
 
+      // Fetch the newly created student with all its populated details for the response
+      const populatedStudent = await studentService.findStudentWithIdentifier({ _id: student._id, userId });
+
       return res.status(201).json({
         status: 201,
         success: true,
         messages: "student added",
-        data: [],
+        data: populatedStudent[0], // findStudentWithIdentifier returns an array
       });
     } catch (error: unknown) {
       await session.abortTransaction();
@@ -402,6 +405,57 @@ export class StudentController {
 
     } catch (error: unknown) {
       next(error as Error);
+    }
+  }
+
+  async updateDraft(req: Request, res: Response, next: NextFunction) {
+    const session = await mongoose.startSession();
+    try {
+      const userId = (req.user as any).id;
+      const { id } = req.params;
+      session.startTransaction();
+
+      // Find the existing draft to ensure it belongs to the user
+      const existingDraft = await studentService.findStudentId(id);
+
+      if (!existingDraft || existingDraft.userId !== userId) {
+        return res.status(404).json({
+          status: 404,
+          success: false,
+          message: "Draft not found or access denied",
+        });
+      }
+
+      const draftData = { ...req.body };
+
+      // Handle profile image if uploaded
+      if ((req as any).file) {
+        draftData.profileImage = `/uploads/${(req as any).file.filename}`;
+        // If there was an old image, delete it
+        if (existingDraft.profileImage) {
+          const oldImagePath = path.join(__dirname, '..', '..', existingDraft.profileImage);
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+      }
+
+
+      const student = await studentService.updateStudent({ ...draftData, _id: id }, session);
+
+      await session.commitTransaction();
+
+      return res.status(200).json({
+        status: 200,
+        success: true,
+        messages: "Draft updated successfully",
+        data: student,
+      });
+    } catch (error: unknown) {
+      await session.abortTransaction();
+      next(error as Error);
+    } finally {
+      session.endSession();
     }
   }
 }

@@ -12,6 +12,8 @@ const Fees_service_1 = require("../services/Fees.service");
 const mongoose_1 = __importDefault(require("mongoose"));
 const Income_service_1 = require("../services/Income.service");
 const Expense_service_1 = require("../services/Expense.service");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const studentService = new Student_service_1.StudentService();
 const guardianService = new Guardian_service_1.GuardianService();
 const addressService = new Address_service_1.AddressService();
@@ -65,11 +67,13 @@ class StudentController {
                 }, session);
             }
             await session.commitTransaction();
+            // Fetch the newly created student with all its populated details for the response
+            const populatedStudent = await studentService.findStudentWithIdentifier({ _id: student._id, userId });
             return res.status(201).json({
                 status: 201,
                 success: true,
                 messages: "student added",
-                data: [],
+                data: populatedStudent[0], // findStudentWithIdentifier returns an array
             });
         }
         catch (error) {
@@ -362,6 +366,50 @@ class StudentController {
         }
         catch (error) {
             next(error);
+        }
+    }
+    async updateDraft(req, res, next) {
+        const session = await mongoose_1.default.startSession();
+        try {
+            const userId = req.user.id;
+            const { id } = req.params;
+            session.startTransaction();
+            // Find the existing draft to ensure it belongs to the user
+            const existingDraft = await studentService.findStudentId(id);
+            if (!existingDraft || existingDraft.userId !== userId) {
+                return res.status(404).json({
+                    status: 404,
+                    success: false,
+                    message: "Draft not found or access denied",
+                });
+            }
+            const draftData = { ...req.body };
+            // Handle profile image if uploaded
+            if (req.file) {
+                draftData.profileImage = `/uploads/${req.file.filename}`;
+                // If there was an old image, delete it
+                if (existingDraft.profileImage) {
+                    const oldImagePath = path_1.default.join(__dirname, '..', '..', existingDraft.profileImage);
+                    if (fs_1.default.existsSync(oldImagePath)) {
+                        fs_1.default.unlinkSync(oldImagePath);
+                    }
+                }
+            }
+            const student = await studentService.updateStudent({ ...draftData, _id: id }, session);
+            await session.commitTransaction();
+            return res.status(200).json({
+                status: 200,
+                success: true,
+                messages: "Draft updated successfully",
+                data: student,
+            });
+        }
+        catch (error) {
+            await session.abortTransaction();
+            next(error);
+        }
+        finally {
+            session.endSession();
         }
     }
 }
