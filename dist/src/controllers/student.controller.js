@@ -32,52 +32,151 @@ class StudentController {
     }
     async addStudent(req, res, next) {
         const session = await mongoose_1.default.startSession();
+        let isTransactionStarted = false;
         try {
             const userId = req.user.id;
+            console.log(`[addStudent] Start registration for userId: ${userId}`);
+            // Helper to parse stringified JSON from multipart/form-data
+            const parseField = (field) => {
+                if (typeof field === 'string') {
+                    try {
+                        return JSON.parse(field);
+                    }
+                    catch (e) {
+                        return field;
+                    }
+                }
+                return field;
+            };
+            // Safely parse objects in case they are stringified by multipart-form request
+            const studentPayload = parseField(req.body.student) || {};
+            const guardianPayload = parseField(req.body.guardian) || {};
+            const addressPayload = parseField(req.body.addresse || req.body.address) || {};
+            const madrasaPayload = parseField(req.body.oldMadrasaInfo || req.body.madrasa) || {};
+            const feesPayload = parseField(req.body.fees) || {};
             req.body.profileImage = req.file ? `/uploads/${req.file.filename}` : null;
-            session.startTransaction();
-            const student = await studentService.addStudent({ ...req.body.student, profileImage: req.body.profileImage, userId }, session);
-            await guardianService.addGuardian({ ...req.body.guardian, student: student._id, userId }, session);
-            await addressService.addAddress({ ...req.body.address, student: student._id, userId }, session);
-            await madrasaService.addMadrasaInfo({ ...req.body.madrasa, student: student._id, userId }, session);
-            await feesService.addFees({ ...req.body.fees, student: student._id, userId }, session);
-            let totalFee = 0;
-            const excludeFields = ["helpAmount", "helpType", "student", "userId", "_id"];
-            for (const key in req.body.fees) {
-                if (!excludeFields.includes(key) && !isNaN(Number(req.body.fees[key]))) {
-                    totalFee += Number(req.body.fees[key]);
+            console.log(`[addStudent] Student UID from payload: ${studentPayload.uid}`);
+            const existingStudent = await studentService.findByIdOrUid(studentPayload._id, studentPayload.uid, userId);
+            console.log(`[addStudent] Existing student found: ${!!existingStudent}${existingStudent ? ` (Status: ${existingStudent.status}, ID: ${existingStudent._id})` : ''}`);
+            // --- Transaction Setup ---
+            const topologyType = mongoose_1.default.connection.getClient().topology?.description?.type;
+            const supportsTransactions = topologyType === 'ReplicaSetWithPrimary' || topologyType === 'Sharded';
+            if (supportsTransactions) {
+                try {
+                    session.startTransaction();
+                    isTransactionStarted = true;
+                    console.log("[addStudent] Transaction started successfully");
+                }
+                catch (transactionError) {
+                    console.warn("[addStudent] Failed to start transaction:", transactionError);
                 }
             }
-            const helpAmount = Number(req.body.fees.helpAmount || 0);
+            else {
+                console.warn(`[addStudent] Transactions not supported on MongoDB topology: ${topologyType}. Proceeding without transaction.`);
+            }
+            const activeSession = isTransactionStarted ? session : undefined;
+            // Sanitization Helper: removes internal MongoDB/Mongoose fields
+            const sanitize = (obj) => {
+                if (!obj || typeof obj !== 'object')
+                    return obj;
+                const clean = { ...obj };
+                delete clean._id;
+                delete clean.__v;
+                delete clean.createdAt;
+                delete clean.updatedAt;
+                return clean;
+            };
+            // Draft-specific fields that should NOT be in the main Student document
+            const draftFields = ['guardian', 'addresse', 'fees', 'oldMadrasaInfo'];
+            const cleanStudentPayload = sanitize(studentPayload);
+            draftFields.forEach(field => delete cleanStudentPayload[field]);
+            let student;
+            if (existingStudent) {
+                if (existingStudent.status === 'draft') {
+                    console.log(`[addStudent] Promoting draft student ${existingStudent._id} to active`);
+                    // Promote draft to active and update data
+                    // We use the existing database ID (_id) for the student record itself
+                    student = await studentService.updateStudent({
+                        ...cleanStudentPayload,
+                        _id: existingStudent._id,
+                        status: 'active',
+                        profileImage: req.body.profileImage,
+                        userId
+                    }, activeSession);
+                }
+                else {
+                    console.warn(`[addStudent] Conflict: Active student already exists with UID ${studentPayload.uid}`);
+                    return res.status(409).json({
+                        status: 409,
+                        success: false,
+                        message: "Student with this ID already exists",
+                    });
+                }
+            }
+            else {
+                console.log("[addStudent] Creating new active student");
+                student = await studentService.addStudent({ ...cleanStudentPayload, profileImage: req.body.profileImage, userId }, activeSession);
+            }
+            if (!student) {
+                console.error("[addStudent] Critical: Student record could not be created or updated");
+                return res.status(500).json({
+                    status: 500,
+                    success: false,
+                    message: "Failed to process student record",
+                });
+            }
+            console.log(`[addStudent] Student record active: ${student._id}. Saving associated details...`);
+            // Save Guardian, Address, Madrasa, Fees (Stripped of old IDs to prevent duplicate key errors)
+            await guardianService.addGuardian({ ...sanitize(guardianPayload), student: student._id, userId }, activeSession);
+            await addressService.addAddress({ ...sanitize(addressPayload), student: student._id, userId }, activeSession);
+            await madrasaService.addMadrasaInfo({ ...sanitize(madrasaPayload), student: student._id, userId }, activeSession);
+            await feesService.addFees({ ...sanitize(feesPayload), student: student._id, userId }, activeSession);
+            // Income/Expense logic
+            let totalFee = 0;
+            const excludeFields = ["helpAmount", "helpType", "student", "userId", "_id"];
+            for (const key in feesPayload) {
+                if (!excludeFields.includes(key) && !isNaN(Number(feesPayload[key]))) {
+                    totalFee += Number(feesPayload[key]);
+                }
+            }
+            const helpAmount = Number(feesPayload.helpAmount || 0);
             const finalIncome = totalFee - helpAmount;
             if (finalIncome > 0) {
+                console.log(`[addStudent] Recording income: ${finalIncome}`);
                 await incomeService.addIncome({
                     amount: finalIncome,
                     sectorName: "Admission",
                     userId,
                     description: `Admission fee for student ${student.name} (Roll: ${student.roll || 'N/A'})`
-                }, session);
+                }, activeSession);
             }
             if (helpAmount > 0) {
+                console.log(`[addStudent] Recording expense (waiver): ${helpAmount}`);
                 await expenseService.addExpense({
                     amount: helpAmount,
-                    sectorName: req.body.fees.helpType || "Scholarship",
+                    sectorName: feesPayload.helpType || "Scholarship",
                     userId,
                     description: `Fee waiver for student ${student.name} (Roll: ${student.roll || 'N/A'})`
-                }, session);
+                }, activeSession);
             }
-            await session.commitTransaction();
-            // Fetch the newly created student with all its populated details for the response
+            if (isTransactionStarted) {
+                await session.commitTransaction();
+                console.log("[addStudent] Transaction committed");
+            }
+            console.log("[addStudent] Registration complete. Fetching populated data...");
             const populatedStudent = await studentService.findStudentWithIdentifier({ _id: student._id, userId });
             return res.status(201).json({
                 status: 201,
                 success: true,
                 messages: "student added",
-                data: populatedStudent[0], // findStudentWithIdentifier returns an array
+                data: populatedStudent[0],
             });
         }
         catch (error) {
-            await session.abortTransaction();
+            if (isTransactionStarted) {
+                await session.abortTransaction();
+            }
+            console.error("[addStudent] Error:", error);
             next(error);
         }
         finally {
@@ -212,7 +311,13 @@ class StudentController {
     async filterAllStudents(req, res, next) {
         try {
             const userId = req.user.id;
-            const results = await studentService.filterStudent({ ...req.query, userId });
+            // Default to status: 'active' if not specified
+            const filter = {
+                status: 'active',
+                ...req.query,
+                userId
+            };
+            const results = await studentService.filterStudent(filter);
             return res.status(200).json({
                 status: 200,
                 message: "all student data",
@@ -226,9 +331,24 @@ class StudentController {
     }
     async saveDraft(req, res, next) {
         const session = await mongoose_1.default.startSession();
+        let isTransactionStarted = false;
         try {
             const userId = req.user.id;
-            session.startTransaction();
+            const topologyType = mongoose_1.default.connection.getClient().topology?.description?.type;
+            const supportsTransactions = topologyType === 'ReplicaSetWithPrimary' || topologyType === 'Sharded';
+            if (supportsTransactions) {
+                try {
+                    session.startTransaction();
+                    isTransactionStarted = true;
+                }
+                catch (transactionError) {
+                    console.warn("Failed to start transaction in saveDraft:", transactionError);
+                }
+            }
+            else {
+                console.warn(`Transactions not supported on MongoDB topology: ${topologyType}. Proceeding without transaction.`);
+            }
+            const activeSession = isTransactionStarted ? session : undefined;
             req.body.profileImage = req.file ? `/uploads/${req.file.filename}` : null;
             // Handle legacy payload (root fields) vs nested 'student' field
             let studentBody = req.body.student || {};
@@ -253,8 +373,28 @@ class StudentController {
             delete draftData.student;
             delete draftData.address;
             delete draftData.madrasa;
-            const student = await studentService.addStudent(draftData, session);
-            await session.commitTransaction();
+            let student;
+            // Check for existing draft by either provided _id or uid
+            const existingDraft = await studentService.findByIdOrUid(draftData._id, draftData.uid, userId);
+            if (existingDraft) {
+                if (existingDraft.status === 'draft') {
+                    // Robust update: use the found draft's ID to ensure we update the right document
+                    student = await studentService.updateStudent({ ...draftData, _id: existingDraft._id }, activeSession);
+                }
+                else {
+                    return res.status(409).json({
+                        status: 409,
+                        success: false,
+                        message: "Cannot save draft: An active student already exists with this ID",
+                    });
+                }
+            }
+            else {
+                student = await studentService.addStudent(draftData, activeSession);
+            }
+            if (isTransactionStarted) {
+                await session.commitTransaction();
+            }
             return res.status(201).json({
                 status: 201, // Created
                 success: true,
@@ -263,7 +403,9 @@ class StudentController {
             });
         }
         catch (error) {
-            await session.abortTransaction();
+            if (isTransactionStarted) {
+                await session.abortTransaction();
+            }
             next(error);
         }
         finally {
@@ -305,18 +447,13 @@ class StudentController {
                 });
             }
             // Verify userId matches (user-based data isolation)
+            // Verify userId matches (user-based data isolation)
             if (student.userId !== userId) {
                 return res.status(403).json({
                     status: 403,
                     success: false,
                     message: "Access denied"
                 });
-            }
-            // Optional: Verify status is draft? 
-            // If user wants to "edit" a draft, they need the data regardless.
-            if (student.status !== 'draft') {
-                // Maybe warn or redirect? 
-                // For now, return it but maybe checking status is good practice.
             }
             return res.status(200).json({
                 status: 200,
@@ -370,10 +507,25 @@ class StudentController {
     }
     async updateDraft(req, res, next) {
         const session = await mongoose_1.default.startSession();
+        let isTransactionStarted = false;
         try {
             const userId = req.user.id;
             const { id } = req.params;
-            session.startTransaction();
+            const topologyType = mongoose_1.default.connection.getClient().topology?.description?.type;
+            const supportsTransactions = topologyType === 'ReplicaSetWithPrimary' || topologyType === 'Sharded';
+            if (supportsTransactions) {
+                try {
+                    session.startTransaction();
+                    isTransactionStarted = true;
+                }
+                catch (transactionError) {
+                    console.warn("Failed to start transaction in updateDraft:", transactionError);
+                }
+            }
+            else {
+                console.warn(`Transactions not supported on MongoDB topology: ${topologyType}. Proceeding without transaction.`);
+            }
+            const activeSession = isTransactionStarted ? session : undefined;
             // Find the existing draft to ensure it belongs to the user
             const existingDraft = await studentService.findStudentId(id);
             if (!existingDraft || existingDraft.userId !== userId) {
@@ -395,8 +547,10 @@ class StudentController {
                     }
                 }
             }
-            const student = await studentService.updateStudent({ ...draftData, _id: id }, session);
-            await session.commitTransaction();
+            const student = await studentService.updateStudent({ ...draftData, _id: id }, activeSession);
+            if (isTransactionStarted) {
+                await session.commitTransaction();
+            }
             return res.status(200).json({
                 status: 200,
                 success: true,
@@ -405,7 +559,9 @@ class StudentController {
             });
         }
         catch (error) {
-            await session.abortTransaction();
+            if (isTransactionStarted) {
+                await session.abortTransaction();
+            }
             next(error);
         }
         finally {

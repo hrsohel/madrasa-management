@@ -117,7 +117,7 @@ const AddressSchema = new Schema<IAddress>(
 );
 
 // Indexes
-AddressSchema.index({ student: 1 });
+// AddressSchema.index({ student: 1 }); // Duplicate: student has unique: true
 AddressSchema.index({ presentDivision: 1, presentDistrict: 1 });
 AddressSchema.index({ permanentDivision: 1, permanentDistrict: 1 });
 

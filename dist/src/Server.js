@@ -64,7 +64,11 @@ class Server {
         console.log(process.env.MONGO_URL);
         mongoose_1.default
             .connect(process.env.MONGO_URL)
-            .then(() => console.log("Database connected successfully."))
+            .then(() => {
+            console.log("Database connected successfully.");
+            const topologyType = mongoose_1.default.connection.getClient().topology?.description?.type;
+            console.log("MongoDB Topology Type:", topologyType);
+        })
             .catch((error) => console.log("Database error: ", error));
     }
     getApp() {

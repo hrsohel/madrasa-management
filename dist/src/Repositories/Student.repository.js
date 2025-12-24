@@ -15,7 +15,8 @@ class StudentRepostitory extends BaseRepository_1.BaseRepository {
         console.log('Repository identifier:', identifier);
         // Build the match query
         const matchQuery = {
-            userId: identifier.userId // Keep as string, not ObjectId
+            userId: identifier.userId,
+            status: identifier.status || 'active' // Filter for active by default
         };
         // Add _id, roll, or uid to match
         if (identifier._id) {
@@ -108,6 +109,9 @@ class StudentRepostitory extends BaseRepository_1.BaseRepository {
                     foreignField: "student",
                     as: "populatedFees"
                 }
+            },
+            {
+                $sort: { createdAt: -1 }
             }
         ]);
     }

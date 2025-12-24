@@ -11,7 +11,8 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
 
         // Build the match query
         const matchQuery: any = {
-            userId: identifier.userId // Keep as string, not ObjectId
+            userId: identifier.userId,
+            status: identifier.status || 'active' // Filter for active by default
         };
 
         // Add _id, roll, or uid to match
@@ -107,6 +108,9 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
                     foreignField: "student",
                     as: "populatedFees"
                 }
+            },
+            {
+                $sort: { createdAt: -1 }
             }
         ]);
     }

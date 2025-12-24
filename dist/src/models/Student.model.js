@@ -61,48 +61,30 @@ const StudentSchema = new mongoose_1.Schema({
     },
     uid: {
         type: String,
-        // required: [true, "ID is required"],
         unique: true,
         uppercase: true,
-        // match: [/^STD-\d{4}-\d{5}$/, 'UID must follow format: STD-2025-00001'],
     },
     residential: {
         type: String,
-        // required: [true, 'Residential status is required'],
-        // enum: {
-        //   values: ['Day Scholar', 'Hostel', 'Residential'],
-        //   message: 'Residential must be Day Scholar, Hostel or Residential',
-        // },
     },
     roll: {
         type: String,
-        // required: true,
-        // unique: true,
-        // match: [/^\d{4,6}$/, 'Roll must be numeric (e.g., 001 or 2025001)'],
+        unique: true,
     },
     class: {
         type: String,
     },
     shift: {
         type: String,
-        // required: [true, 'Shift is required'],
-        // enum: {
-        //   values: SHIFT,
-        //   message: 'Shift must be Morning, Day or Evening',
-        // },
     },
     section: {
         type: String,
-        // required: [true, 'Section is required']
     },
     division: {
         type: String,
-        // required: [true, 'Division is required']
     },
     session: {
         type: String,
-        // required: [true, 'Session is required'],
-        // match: [/^\d{2}-\d{2}$/, 'Session format must be YYYY-YY (e.g., 25-26)'],
     },
     profileImage: {
         type: String,
@@ -129,8 +111,7 @@ const StudentSchema = new mongoose_1.Schema({
     strict: false // Allow saving fields not defined in schema (for drafts)
 });
 StudentSchema.index({ class: 1, section: 1, session: 1 });
-StudentSchema.index({ uid: 1 });
-StudentSchema.index({ roll: 1 });
+// Removed duplicate uid and roll indices as they are marked unique: true
 StudentSchema.virtual('age').get(function () {
     if (!this.dob)
         return null;

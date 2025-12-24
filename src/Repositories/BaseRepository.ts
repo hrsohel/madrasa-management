@@ -35,7 +35,7 @@ abstract class BaseRepository<T extends Document> extends BaseRepositoryAbstract
     const skip = Math.abs((Number(page) - 1) * Number(limit))
     delete filter.page
     delete filter.limit
-    return await this.model.find(filter).skip(skip).limit(limit).lean().exec();
+    return await this.model.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec();
   }
 
   async totalDocuments(filter: any): Promise<number> {

@@ -21,6 +21,15 @@ export class StudentService {
     async updateStudent(bodyData: any, session?: ClientSession) {
         return studentRepo.updateStudent(bodyData, session)
     }
+    async findByUid(uid: string, userId: string) {
+        return await studentRepo.findOne({ uid, userId });
+    }
+    async findByIdOrUid(id: string | undefined, uid: string, userId: string) {
+        if (id) {
+            return await studentRepo.findOne({ $or: [{ _id: id }, { uid }], userId });
+        }
+        return await studentRepo.findOne({ uid, userId });
+    }
     async findDrafts(userId: string) {
         return await studentRepo.findDraftsWithDetails(userId);
     }

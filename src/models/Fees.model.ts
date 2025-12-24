@@ -98,7 +98,7 @@ const FeesSchema = new Schema<IFees>(
 );
 
 // Indexes
-FeesSchema.index({ student: 1 }, { unique: true });
+// FeesSchema.index({ student: 1 }, { unique: true }); // Duplicate: student has unique: true
 FeesSchema.index({ helpType: 1 });
 
 const Fees = model<IFees>('Fees', FeesSchema);

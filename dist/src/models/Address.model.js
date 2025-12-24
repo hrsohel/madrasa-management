@@ -83,7 +83,7 @@ const AddressSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
 });
 // Indexes
-AddressSchema.index({ student: 1 });
+// AddressSchema.index({ student: 1 }); // Duplicate: student has unique: true
 AddressSchema.index({ presentDivision: 1, presentDistrict: 1 });
 AddressSchema.index({ permanentDivision: 1, permanentDistrict: 1 });
 // Pre-save: Auto-copy present → permanent if same

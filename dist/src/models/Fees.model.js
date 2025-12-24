@@ -70,7 +70,7 @@ const FeesSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
 });
 // Indexes
-FeesSchema.index({ student: 1 }, { unique: true });
+// FeesSchema.index({ student: 1 }, { unique: true }); // Duplicate: student has unique: true
 FeesSchema.index({ helpType: 1 });
 const Fees = (0, mongoose_1.model)('Fees', FeesSchema);
 exports.default = Fees;
