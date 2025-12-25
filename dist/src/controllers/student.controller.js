@@ -207,8 +207,25 @@ class StudentController {
     }
     async updateFullDetails(req, res, next) {
         const session = await mongoose_1.default.startSession();
+        let isTransactionStarted = false;
         try {
-            session.startTransaction();
+            // --- Transaction Setup ---
+            const topologyType = mongoose_1.default.connection.getClient().topology?.description?.type;
+            const supportsTransactions = topologyType === 'ReplicaSetWithPrimary' || topologyType === 'Sharded';
+            if (supportsTransactions) {
+                try {
+                    session.startTransaction();
+                    isTransactionStarted = true;
+                    console.log("[updateFullDetails] Transaction started successfully");
+                }
+                catch (transactionError) {
+                    console.warn("[updateFullDetails] Failed to start transaction:", transactionError);
+                }
+            }
+            else {
+                console.warn(`[updateFullDetails] Transactions not supported on MongoDB topology: ${topologyType}. Proceeding without transaction.`);
+            }
+            const activeSession = isTransactionStarted ? session : undefined;
             console.log('Update Body:', req.body);
             // 1. Update Student
             // Handle student array if present (unlikely for student, but consistency)
@@ -239,7 +256,7 @@ class StudentController {
             else if (req.body.profileImage) {
                 studentData.profileImage = req.body.profileImage;
             }
-            const updatedStudent = await studentService.updateStudent(studentData, session);
+            const updatedStudent = await studentService.updateStudent(studentData, activeSession);
             // 2. Fetch existing related docs to get their IDs
             const existingData = await studentService.findStudentWithIdentifier({ _id: req.params.id, userId });
             if (!existingData || existingData.length === 0) {
@@ -257,7 +274,7 @@ class StudentController {
                 const guardianId = student.guardian?.[0]?._id;
                 const guardianBody = getData(req.body.guardian);
                 if (guardianId && guardianBody) {
-                    await guardianService.updateGuardian({ ...guardianBody, _id: guardianId }, session);
+                    await guardianService.updateGuardian({ ...guardianBody, _id: guardianId }, activeSession);
                 }
                 else if (!guardianId && guardianBody) {
                     // If guardian doesn't exist but data provided, create it?
@@ -270,7 +287,7 @@ class StudentController {
                 const addressId = student.addresse?.[0]?._id;
                 const addressBody = getData(addressPayload);
                 if (addressId && addressBody) {
-                    await addressService.updateAddress({ ...addressBody, _id: addressId }, session);
+                    await addressService.updateAddress({ ...addressBody, _id: addressId }, activeSession);
                 }
             }
             // 5. Update Previous Madrasa Info (support both 'madrasa' and 'oldMadrasaInfo')
@@ -279,7 +296,7 @@ class StudentController {
                 const madrasaId = student.oldMadrasaInfo?.[0]?._id;
                 const madrasaBody = getData(madrasaPayload);
                 if (madrasaId && madrasaBody) {
-                    await madrasaService.updateMadrasaInfo({ ...madrasaBody, _id: madrasaId }, session);
+                    await madrasaService.updateMadrasaInfo({ ...madrasaBody, _id: madrasaId }, activeSession);
                 }
             }
             // 6. Update Fees (if included)
@@ -290,7 +307,10 @@ class StudentController {
                     await feesService.updateFees({ ...feesBody, _id: feesId });
                 }
             }
-            await session.commitTransaction();
+            if (isTransactionStarted) {
+                await session.commitTransaction();
+                console.log("[updateFullDetails] Transaction committed");
+            }
             // Return updated data
             const finalData = await studentService.findStudentWithIdentifier({ _id: req.params.id });
             return res.status(200).json({
@@ -301,7 +321,10 @@ class StudentController {
             });
         }
         catch (error) {
-            await session.abortTransaction();
+            if (isTransactionStarted) {
+                await session.abortTransaction();
+            }
+            console.error("[updateFullDetails] Error:", error);
             next(error);
         }
         finally {

@@ -217,8 +217,25 @@ export class StudentController {
 
   async updateFullDetails(req: Request, res: Response, next: NextFunction) {
     const session = await mongoose.startSession();
+    let isTransactionStarted = false;
     try {
-      session.startTransaction();
+      // --- Transaction Setup ---
+      const topologyType = (mongoose.connection.getClient() as any).topology?.description?.type;
+      const supportsTransactions = topologyType === 'ReplicaSetWithPrimary' || topologyType === 'Sharded';
+
+      if (supportsTransactions) {
+        try {
+          session.startTransaction();
+          isTransactionStarted = true;
+          console.log("[updateFullDetails] Transaction started successfully");
+        } catch (transactionError) {
+          console.warn("[updateFullDetails] Failed to start transaction:", transactionError);
+        }
+      } else {
+        console.warn(`[updateFullDetails] Transactions not supported on MongoDB topology: ${topologyType}. Proceeding without transaction.`);
+      }
+
+      const activeSession = isTransactionStarted ? session : undefined;
 
       console.log('Update Body:', req.body);
 
@@ -252,7 +269,7 @@ export class StudentController {
         studentData.profileImage = req.body.profileImage;
       }
 
-      const updatedStudent = await studentService.updateStudent(studentData, session);
+      const updatedStudent = await studentService.updateStudent(studentData, activeSession);
 
       // 2. Fetch existing related docs to get their IDs
       const existingData: any = await studentService.findStudentWithIdentifier({ _id: req.params.id, userId });
@@ -273,7 +290,7 @@ export class StudentController {
         const guardianBody = getData(req.body.guardian);
 
         if (guardianId && guardianBody) {
-          await guardianService.updateGuardian({ ...guardianBody, _id: guardianId }, session);
+          await guardianService.updateGuardian({ ...guardianBody, _id: guardianId }, activeSession);
         } else if (!guardianId && guardianBody) {
           // If guardian doesn't exist but data provided, create it?
           // For now adhering to update logic.
@@ -287,7 +304,7 @@ export class StudentController {
         const addressBody = getData(addressPayload);
 
         if (addressId && addressBody) {
-          await addressService.updateAddress({ ...addressBody, _id: addressId }, session);
+          await addressService.updateAddress({ ...addressBody, _id: addressId }, activeSession);
         }
       }
 
@@ -298,7 +315,7 @@ export class StudentController {
         const madrasaBody = getData(madrasaPayload);
 
         if (madrasaId && madrasaBody) {
-          await madrasaService.updateMadrasaInfo({ ...madrasaBody, _id: madrasaId }, session);
+          await madrasaService.updateMadrasaInfo({ ...madrasaBody, _id: madrasaId }, activeSession);
         }
       }
 
@@ -311,7 +328,12 @@ export class StudentController {
         }
       }
 
-      await session.commitTransaction();
+
+      if (isTransactionStarted) {
+        await session.commitTransaction();
+        console.log("[updateFullDetails] Transaction committed");
+      }
+
 
       // Return updated data
       const finalData = await studentService.findStudentWithIdentifier({ _id: req.params.id });
@@ -324,7 +346,10 @@ export class StudentController {
       });
 
     } catch (error: unknown) {
-      await session.abortTransaction();
+      if (isTransactionStarted) {
+        await session.abortTransaction();
+      }
+      console.error("[updateFullDetails] Error:", error);
       next(error as Error);
     } finally {
       session.endSession();
