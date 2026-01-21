@@ -70,49 +70,10 @@ export class StudentRepostitory extends BaseRepository<IStudent> {
     }
 
     async findDraftsWithDetails(userId: string) {
-        return await this.model.aggregate([
-            {
-                $match: {
-                    status: 'draft',
-                    userId: userId
-                }
-            },
-            {
-                $lookup: {
-                    from: "guardians",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedGuardian"
-                }
-            },
-            {
-                $lookup: {
-                    from: "addresses",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedAddresse"
-                }
-            },
-            {
-                $lookup: {
-                    from: "oldmadrasainfos",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedOldMadrasaInfo"
-                }
-            },
-            {
-                $lookup: {
-                    from: "fees",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedFees"
-                }
-            },
-            {
-                $sort: { createdAt: -1 }
-            }
-        ]);
+        return await this.model.find({
+            status: 'draft',
+            userId: userId
+        }).sort({ createdAt: -1 });
     }
 
     async deleteStudent(_id: string) {
