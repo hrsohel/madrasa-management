@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "tsx watch src/app.ts",
-    "start": "node dist/src/app.js",
+    "dev": "node api.js && tsx watch src/app.ts",
+    "start": "node api.js && node dist/src/app.js",
     "server": "nodemon dist/app.js",
-    "build": "tsc"
+    "build": "node api.js && tsc"
   },
   "dependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -20,6 +20,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.11",
     "ts-node": "^10.9.2"
   },

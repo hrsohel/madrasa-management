@@ -19,6 +19,16 @@ const incomeService = new IncomeService();
 const expenseService = new ExpenseService()
 
 export class StudentController {
+  private sanitize(obj: any) {
+    if (!obj || typeof obj !== 'object') return obj;
+    const clean = { ...obj };
+    delete clean._id;
+    delete clean.__v;
+    delete clean.createdAt;
+    delete clean.updatedAt;
+    return clean;
+  }
+
   toBanglaNumber(num: number): string {
     const banglaDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
     return num
@@ -50,7 +60,8 @@ export class StudentController {
       const madrasaPayload = parseField(req.body.oldMadrasaInfo || req.body.madrasa) || {};
       const feesPayload = parseField(req.body.fees) || {};
 
-      req.body.profileImage = (req as any).file ? `/uploads/${(req as any).file.filename}` : null
+      const uploadedImage = (req as any).file ? `/uploads/${(req as any).file.filename}` : null;
+      req.body.profileImage = uploadedImage || studentPayload.profileImage || null;
       console.log(`[addStudent] Student UID from payload: ${studentPayload.uid}`);
 
       const existingStudent = await studentService.findByIdOrUid(studentPayload._id, studentPayload.uid, userId);
@@ -74,20 +85,10 @@ export class StudentController {
 
       const activeSession = isTransactionStarted ? session : undefined;
 
-      // Sanitization Helper: removes internal MongoDB/Mongoose fields
-      const sanitize = (obj: any) => {
-        if (!obj || typeof obj !== 'object') return obj;
-        const clean = { ...obj };
-        delete clean._id;
-        delete clean.__v;
-        delete clean.createdAt;
-        delete clean.updatedAt;
-        return clean;
-      };
 
       // Draft-specific fields that should NOT be in the main Student document
       const draftFields = ['guardian', 'addresse', 'fees', 'oldMadrasaInfo'];
-      const cleanStudentPayload = sanitize(studentPayload);
+      const cleanStudentPayload = this.sanitize(studentPayload);
       draftFields.forEach(field => delete cleanStudentPayload[field]);
 
       let student;
@@ -127,22 +128,36 @@ export class StudentController {
 
       console.log(`[addStudent] Student record active: ${student._id}. Saving associated details...`);
 
-      // Save Guardian, Address, Madrasa, Fees (Stripped of old IDs to prevent duplicate key errors)
-      await guardianService.addGuardian({ ...sanitize(guardianPayload), student: student._id, userId }, activeSession)
-      await addressService.addAddress({ ...sanitize(addressPayload), student: student._id, userId }, activeSession)
-      await madrasaService.addMadrasaInfo({ ...sanitize(madrasaPayload), student: student._id, userId }, activeSession)
-      await feesService.addFees({ ...sanitize(feesPayload), student: student._id, userId }, activeSession)
+      // Restructure feesPayload to match Fees model (Move flat keys to feeItems)
+      const { helpType, helpAmount: rawHelpAmount, ...otherFees } = feesPayload;
+      const numHelpAmount = Number(rawHelpAmount || 0);
+      const structuredFees = {
+        helpType: helpType || 'None',
+        helpAmount: numHelpAmount,
+        feeItems: otherFees?.feeItems || this.sanitize(otherFees), // Use nested or flat keys
+        student: student._id,
+        userId
+      };
 
-      // Income/Expense logic
+      // Save Guardian, Address, Madrasa, Fees (Stripped of old IDs to prevent duplicate key errors)
+      await guardianService.addGuardian({ ...this.sanitize(guardianPayload), student: student._id, userId }, activeSession);
+      await addressService.addAddress({ ...this.sanitize(addressPayload), student: student._id, userId }, activeSession);
+      await madrasaService.addMadrasaInfo({ ...this.sanitize(madrasaPayload), student: student._id, userId }, activeSession);
+      await feesService.addFees(structuredFees, activeSession);
+
+      // Income/Expense logic with dynamic fees
+      const feeItems = structuredFees.feeItems || {};
       let totalFee = 0;
-      const excludeFields = ["helpAmount", "helpType", "student", "userId", "_id"];
-      for (const key in feesPayload) {
-        if (!excludeFields.includes(key) && !isNaN(Number(feesPayload[key]))) {
-          totalFee += Number(feesPayload[key]);
-        }
+
+      // Sum all values from feeItems object/map
+      if (typeof feeItems === 'object') {
+        totalFee = Object.values(feeItems).reduce((sum: number, val: any) => {
+          const numVal = Number(val);
+          return sum + (isNaN(numVal) ? 0 : numVal);
+        }, 0);
       }
-      const helpAmount = Number(feesPayload.helpAmount || 0);
-      const finalIncome = totalFee - helpAmount;
+
+      const finalIncome = Math.max(0, totalFee - numHelpAmount);
 
       if (finalIncome > 0) {
         console.log(`[addStudent] Recording income: ${finalIncome}`);
@@ -154,10 +169,10 @@ export class StudentController {
         }, activeSession);
       }
 
-      if (helpAmount > 0) {
-        console.log(`[addStudent] Recording expense (waiver): ${helpAmount}`);
+      if (numHelpAmount > 0) {
+        console.log(`[addStudent] Recording expense (waiver): ${numHelpAmount}`);
         await expenseService.addExpense({
-          amount: helpAmount,
+          amount: numHelpAmount,
           sectorName: feesPayload.helpType || "Scholarship",
           userId,
           description: `Fee waiver for student ${student.name} (Roll: ${student.roll || 'N/A'})`
@@ -324,7 +339,14 @@ export class StudentController {
         const feesId = student.fees?.[0]?._id;
         const feesBody = getData(req.body.fees);
         if (feesId && feesBody) {
-          await feesService.updateFees({ ...feesBody, _id: feesId });
+          const { helpType, helpAmount, _id, createdAt, updatedAt, __v, ...otherFees } = feesBody;
+          const structuredUpdate = {
+            _id: feesId,
+            helpType,
+            helpAmount: Number(helpAmount || 0),
+            feeItems: otherFees?.feeItems || this.sanitize(otherFees)
+          };
+          await feesService.updateFees(structuredUpdate);
         }
       }
 
@@ -383,6 +405,15 @@ export class StudentController {
     try {
       const userId = (req.user as any).id;
 
+      // Helper to parse stringified JSON from multipart/form-data
+      const parseField = (field: any) => {
+        if (typeof field === 'string') {
+          try { return JSON.parse(field); }
+          catch (e) { return field; }
+        }
+        return field;
+      };
+
       const topologyType = (mongoose.connection.getClient() as any).topology?.description?.type;
       const supportsTransactions = topologyType === 'ReplicaSetWithPrimary' || topologyType === 'Sharded';
 
@@ -399,28 +430,32 @@ export class StudentController {
 
       const activeSession = isTransactionStarted ? session : undefined;
 
-      req.body.profileImage = (req as any).file ? `/uploads/${(req as any).file.filename}` : null;
+      const studentPayload = parseField(req.body.student) || {};
+      const uploadedImage = (req as any).file ? `/uploads/${(req as any).file.filename}` : null;
+      // Prioritize uploaded file, then existing path from payload (draft), then null
+      req.body.profileImage = uploadedImage || studentPayload.profileImage || null;
 
-      // Handle legacy payload (root fields) vs nested 'student' field
-      let studentBody = req.body.student || {};
-      // If student is array, take first (safeguard)
-      if (Array.isArray(studentBody)) studentBody = studentBody[0];
+      // Handle legacy payload (root fields) vs nested fields from multipart
+      const studentBody = parseField(req.body.student) || {};
+      const guardianBody = parseField(req.body.guardian);
+      const addressBody = parseField(req.body.addresse || req.body.address);
+      const feesBody = parseField(req.body.fees);
+      const madrasaBody = parseField(req.body.oldMadrasaInfo || req.body.madrasa);
 
       // Construct the unified draft payload
       const draftData = {
         ...req.body,                // Spread root properties (legacy/mix)
-        ...studentBody,             // Spread structured student props (overrides root)
+        ...(typeof studentBody === 'object' ? studentBody : {}), // Spread structured student props
 
-        // Explicitly map/ensure the nested arrays are taken from body
-        // and assigned to the schema fields we just added.
-        guardian: req.body.guardian,
-        addresse: req.body.addresse || req.body.address, // Handle both
-        fees: req.body.fees,
-        oldMadrasaInfo: req.body.oldMadrasaInfo || req.body.madrasa, // Handle both
+        // Explicitly map nested data to the schema fields
+        guardian: guardianBody ? [guardianBody] : req.body.guardian,
+        addresse: addressBody ? [addressBody] : (req.body.addresse || req.body.address),
+        fees: feesBody || req.body.fees,
+        oldMadrasaInfo: madrasaBody ? [madrasaBody] : (req.body.oldMadrasaInfo || req.body.madrasa),
 
         status: 'draft',
-        profileImage: req.body.profileImage,
-        userId  // Add userId to draft data
+        profileImage: req.body.profileImage || studentBody.profileImage || req.body.profileImage,
+        userId
       };
 
       // Cleanup: Remove the 'student' key if it exists in root to avoid duplication/bloat
@@ -594,6 +629,15 @@ export class StudentController {
 
       const activeSession = isTransactionStarted ? session : undefined;
 
+      // Helper to parse stringified JSON from multipart/form-data
+      const parseField = (field: any) => {
+        if (typeof field === 'string') {
+          try { return JSON.parse(field); }
+          catch (e) { return field; }
+        }
+        return field;
+      };
+
       // Find the existing draft to ensure it belongs to the user
       const existingDraft = await studentService.findStudentId(id);
 
@@ -605,7 +649,23 @@ export class StudentController {
         });
       }
 
-      const draftData = { ...req.body };
+      const studentBody = parseField(req.body.student) || {};
+      const guardianBody = parseField(req.body.guardian);
+      const addressBody = parseField(req.body.addresse || req.body.address);
+      const feesBody = parseField(req.body.fees);
+      const madrasaBody = parseField(req.body.oldMadrasaInfo || req.body.madrasa);
+
+      const draftData = {
+        ...req.body,
+        ...(typeof studentBody === 'object' ? studentBody : {}),
+        status: 'draft'
+      };
+
+      // Map nested fields if present in multipart/form-data
+      if (guardianBody) draftData.guardian = [guardianBody];
+      if (addressBody) draftData.addresse = [addressBody];
+      if (feesBody) draftData.fees = feesBody;
+      if (madrasaBody) draftData.oldMadrasaInfo = [madrasaBody];
 
       // Handle profile image if uploaded
       if ((req as any).file) {
@@ -614,11 +674,14 @@ export class StudentController {
         if (existingDraft.profileImage) {
           const oldImagePath = path.join(__dirname, '..', '..', existingDraft.profileImage);
           if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
+            try {
+              fs.unlinkSync(oldImagePath);
+            } catch (err) {
+              console.warn("Failed to delete old profile image:", err);
+            }
           }
         }
       }
-
 
       const student = await studentService.updateStudent({ ...draftData, _id: id }, activeSession);
 

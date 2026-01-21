@@ -62,6 +62,20 @@ class MadrasaSettingsController {
       next(error);
     }
   }
+
+  async getFeeStructure(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req.user as any).id;
+      const fees = await madrasaSettingsService.getFeeStructure(userId);
+      res.status(200).json({
+        success: true,
+        message: 'Fee structure retrieved successfully',
+        data: fees
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const madrasaSettingsController = new MadrasaSettingsController();

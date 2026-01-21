@@ -142,6 +142,10 @@ router.delete(
   "/madrasa-settings/fees/:feeName",
   madrasaSettingsController.removeFee
 );
+router.get(
+  "/madrasa-settings/fee-structure",
+  madrasaSettingsController.getFeeStructure
+);
 router.get("/get-id", idController.updateID)
 
 export const StudentRoutes = router;
