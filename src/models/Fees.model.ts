@@ -4,16 +4,15 @@ import { Schema, model, Document } from 'mongoose';
 export interface IFees extends Document {
   student: Schema.Types.ObjectId; // ref: 'Student'
 
-  admissionFee: number;
-  libraryFee: number;
-  confirmFee: number;
-  ITFee: number;
-  IDCardFee: number;
-  kafelaFee: number;
-  booksFee: number;
+  // Dynamic fee items stored as key-value pairs (e.g., {"ভর্তি ফি": 5000, "গ্রন্থাগার ফি": 500})
+  feeItems: Map<string, number>;
 
-  helpType: string;     // e.g., "Orphan", "Scholarship", "Staff Child", "Poor Fund"
-  helpAmount: number;   // Amount waived or discounted (as string if you want to store "Full" / "50%" etc.)
+  // Calculated fields
+  totalFees: number;      // Sum of all feeItems
+  finalAmount: number;    // totalFees - helpAmount
+
+  helpType: string;       // e.g., "Orphan", "Scholarship", "Staff Child", "Poor Fund"
+  helpAmount: number;     // Amount waived or discounted
   trxID?: string;
   userId: Schema.Types.ObjectId;
 }
@@ -23,71 +22,50 @@ const FeesSchema = new Schema<IFees>(
     student: {
       type: Schema.Types.ObjectId,
       ref: 'Student',
-      // required: true,
       unique: true,
     },
 
-    admissionFee: {
+    // Dynamic fee items - allows any fee type defined in Madrasa settings
+    feeItems: {
+      type: Map,
+      of: Number,
+      default: new Map(),
+    },
+
+    // Auto-calculated total of all fee items
+    totalFees: {
       type: Number,
-      // required: true,
+      default: 0,
       min: 0,
     },
 
-    libraryFee: {
+    // Final amount after applying help/discount
+    finalAmount: {
       type: Number,
-      // required: true,
-      min: 0,
-    },
-
-    confirmFee: {
-      type: Number,
-      // required: true,
-      min: 0,
-    },
-
-    ITFee: {
-      type: Number,
-      // required: true,
-      min: 0,
-    },
-
-    IDCardFee: {
-      type: Number,
-      // required: true,
-      min: 0,
-    },
-
-    kafelaFee: {
-      type: Number,
-      // required: true,
-      min: 0,
-    },
-
-    booksFee: {
-      type: Number,
-      // required: true,
+      default: 0,
       min: 0,
     },
 
     helpType: {
       type: String,
-      // required: true,
       default: 'None',
     },
+
+    helpAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     trxID: {
       type: String,
       required: false,
     },
+
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'User', // Assuming there's a 'User' model
+      ref: 'User',
       required: true,
-    },
-    helpAmount: {
-      type: Number,
-      // required: true,
-      default: 0,
-      min: 0
     },
   },
   {
@@ -97,9 +75,22 @@ const FeesSchema = new Schema<IFees>(
   }
 );
 
+// Pre-save hook to auto-calculate totalFees and finalAmount
+FeesSchema.pre('save', function () {
+  // Calculate total from feeItems Map
+  if (this.feeItems && this.feeItems.size > 0) {
+    this.totalFees = Array.from(this.feeItems.values()).reduce((sum, val) => sum + (val || 0), 0);
+  } else {
+    this.totalFees = 0;
+  }
+
+  // Calculate final amount after help/discount
+  this.finalAmount = Math.max(0, this.totalFees - (this.helpAmount || 0));
+});
+
 // Indexes
-// FeesSchema.index({ student: 1 }, { unique: true }); // Duplicate: student has unique: true
 FeesSchema.index({ helpType: 1 });
+FeesSchema.index({ student: 1 });
 
 const Fees = model<IFees>('Fees', FeesSchema);
 

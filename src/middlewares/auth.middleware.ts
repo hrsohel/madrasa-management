@@ -26,8 +26,8 @@ export const verifyToken = async (
                 error: "You are not logged in",
             });
         }
-        // Check if env secret exists
         if (!process.env.TOKEN_SECRET) {
+            console.error("TOKEN_SECRET is missing from .env");
             throw new Error("TOKEN_SECRET is not defined in environment variables");
         }
 
@@ -43,10 +43,11 @@ export const verifyToken = async (
         }
         req.user = decoded;
         next();
-    } catch (error) {
+    } catch (error: any) {
+        console.error("Auth Error:", error.message);
         res.status(403).json({
             status: "fail",
-            error: "Invalid token",
+            error: error.name === "TokenExpiredError" ? "Token expired" : "Invalid token",
         });
     }
 };

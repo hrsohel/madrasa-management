@@ -11,7 +11,11 @@ class FeesRepository extends BaseRepository_1.BaseRepository {
         super(Fees_model_1.default);
     }
     async updateFees(bodyData, session) {
-        return await Fees_model_1.default.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true });
+        const doc = await Fees_model_1.default.findById(bodyData._id).session(session || null);
+        if (!doc)
+            return null;
+        Object.assign(doc, bodyData);
+        return await doc.save({ session });
     }
 }
 exports.FeesRepository = FeesRepository;
