@@ -48,6 +48,15 @@ class MadrasaSettingsService {
     }
     return madrasaSettingsRepository.removeFee(feeName, userId);
   }
+
+  /**
+   * Get the fee structure/configuration for an institution
+   * Returns an object with fee names as keys and default amounts as values
+   */
+  async getFeeStructure(userId: string): Promise<Record<string, number>> {
+    const madrasa = await this.get(userId);
+    return madrasa?.fees || {};
+  }
 }
 
 export const madrasaSettingsService = new MadrasaSettingsService();

@@ -45,5 +45,13 @@ class MadrasaSettingsService {
         }
         return madrasaSettings_repository_1.madrasaSettingsRepository.removeFee(feeName, userId);
     }
+    /**
+     * Get the fee structure/configuration for an institution
+     * Returns an object with fee names as keys and default amounts as values
+     */
+    async getFeeStructure(userId) {
+        const madrasa = await this.get(userId);
+        return madrasa?.fees || {};
+    }
 }
 exports.madrasaSettingsService = new MadrasaSettingsService();

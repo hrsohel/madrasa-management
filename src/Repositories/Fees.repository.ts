@@ -7,6 +7,9 @@ export class FeesRepository extends BaseRepository<IFees> {
       super(Fees)
    }
    async updateFees(bodyData: any, session?: ClientSession) {
-      return await Fees.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true })
+      const doc = await Fees.findById(bodyData._id).session(session || null);
+      if (!doc) return null;
+      Object.assign(doc, bodyData);
+      return await doc.save({ session });
    }
 }
