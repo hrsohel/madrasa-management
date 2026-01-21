@@ -57,5 +57,6 @@ router.post("/madrasa-settings", upload_1.upload.single("logo"), madrasaSettings
 router.patch("/madrasa-settings", upload_1.upload.single("logo"), madrasaSettings_controller_1.madrasaSettingsController.update);
 router.post("/madrasa-settings/fees", madrasaSettings_controller_1.madrasaSettingsController.addFee);
 router.delete("/madrasa-settings/fees/:feeName", madrasaSettings_controller_1.madrasaSettingsController.removeFee);
+router.get("/madrasa-settings/fee-structure", madrasaSettings_controller_1.madrasaSettingsController.getFeeStructure);
 router.get("/get-id", idController.updateID);
 exports.StudentRoutes = router;

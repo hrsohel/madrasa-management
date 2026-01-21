@@ -71,49 +71,10 @@ class StudentRepostitory extends BaseRepository_1.BaseRepository {
         return await Student_model_1.default.findOneAndUpdate({ _id: bodyData._id }, { $set: bodyData }, { new: true, session });
     }
     async findDraftsWithDetails(userId) {
-        return await this.model.aggregate([
-            {
-                $match: {
-                    status: 'draft',
-                    userId: userId
-                }
-            },
-            {
-                $lookup: {
-                    from: "guardians",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedGuardian"
-                }
-            },
-            {
-                $lookup: {
-                    from: "addresses",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedAddresse"
-                }
-            },
-            {
-                $lookup: {
-                    from: "oldmadrasainfos",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedOldMadrasaInfo"
-                }
-            },
-            {
-                $lookup: {
-                    from: "fees",
-                    localField: "_id",
-                    foreignField: "student",
-                    as: "populatedFees"
-                }
-            },
-            {
-                $sort: { createdAt: -1 }
-            }
-        ]);
+        return await this.model.find({
+            status: 'draft',
+            userId: userId
+        }).sort({ createdAt: -1 });
     }
     async deleteStudent(_id) {
         return await this.model.findByIdAndDelete(_id);
